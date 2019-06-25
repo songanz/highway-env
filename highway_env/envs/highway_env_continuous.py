@@ -6,6 +6,7 @@ from highway_env import utils
 from highway_env.envs.abstract import AbstractEnv
 from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.dynamics import Vehicle
+from surprise_based.net_CVAE import *
 
 
 class HighwayEnvCon(AbstractEnv):
@@ -44,10 +45,13 @@ class HighwayEnvCon(AbstractEnv):
     DEFAULT_CONFIG = {
         "observation": {
             "type": "Kinematics",
-            "vehicles_count": 6
+            "FEATURES": ['x', 'y', 'vx', 'vy'],
+            "vehicles_count": 7
         },
         "initial_spacing": 2,
         "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
+        # "other_vehicles_type": "highway_env.vehicle.behavior.AggressiveVehicle",
+        # "other_vehicles_type": "highway_env.vehicle.behavior.DefensiveVehicle",
         "screen_width": 600,
         "screen_height": 150,
         "centering_position": [0.3, 0.5],
@@ -181,7 +185,7 @@ class HighwayEnvCon(AbstractEnv):
         # crash
         if self.vehicle.crashed:
             # print('crash rw: %8.2f' % (self.config["collision_reward"]))
-            return self.config["collision_reward"]*100
+            return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
         # outside road
         if self.vehicle.position[1] > ((lane_num - 1) * lane_width + lane_width/2) or \
                 self.vehicle.position[1] < (0 - lane_width/2):

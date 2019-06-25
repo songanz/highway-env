@@ -285,7 +285,6 @@ def learn(*,
     # collect reward data for showing performance
     total_reward = []
     mean_reward = []
-    ep_length = []
 
     if sum([max_iters>0, total_timesteps>0, max_episodes>0])==0:
         # noththing to be done
@@ -387,9 +386,8 @@ def learn(*,
         lenbuffer.extend(lens)
         rewbuffer.extend(rews)
 
-        ep_length.append(seg["ep_lens"][-1])
-        total_reward.append(seg["ep_rets"][-1])
-        mean_reward.append(seg["ep_rets"][-1]/seg["ep_lens"][-1])
+        total_reward.append(sum(seg["ep_rets"]))
+        mean_reward.append(sum(seg["ep_rets"])/sum(seg["ep_lens"]))
 
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
         logger.record_tabular("EpTotalRewMean", np.mean(rewbuffer))
@@ -407,8 +405,7 @@ def learn(*,
 
         trainHist = osp.abspath('C:/Users/szhan117/Documents/git_repo/highway-env/models/trainHist')
         sio.savemat(trainHist,
-                    {'timestep_of_each_ep': ep_length,
-                     'total_reward': total_reward,
+                    {'total_reward': total_reward,
                      'mean_reward': mean_reward})
 
         if rank==0:
