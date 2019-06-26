@@ -59,7 +59,10 @@ class KinematicObservation(ObservationType):
         :param vehicles_count: Number of observed vehicles
         """
         self.env = env
-        self.features = features
+        if not kwargs["FEATURES"]:
+            self.features = features
+        else:
+            self.features = kwargs["FEATURES"]
         self.vehicles_count = vehicles_count
 
     def space(self):

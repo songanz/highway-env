@@ -10,7 +10,8 @@ import sys
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--env=highway-continuous-v0",
+    # "--env=highway-continuous-v0",
+    "--env=highway-continuous-intrinsic-rew-v0",
     # "--env=parking-v0",
     "--alg=trpo_mpi",
     # "--num_timesteps=1e7",  # episode * steps = num_timesteps = 1e7

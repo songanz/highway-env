@@ -236,7 +236,7 @@ class Road(Loggable):
     def closest_vehicles_to(self, vehicle, count):
         sorted_v = sorted([v for v in self.vehicles
                            if v is not vehicle
-                           and -2*vehicle.LENGTH < vehicle.lane_distance_to(v)],
+                           and -5*vehicle.LENGTH < vehicle.lane_distance_to(v)],
                           key=lambda v: abs(vehicle.lane_distance_to(v)))
         return sorted_v[:count]
 

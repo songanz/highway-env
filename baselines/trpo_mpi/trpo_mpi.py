@@ -26,6 +26,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     new = True
     rew = 0.0
     ob = env.reset()
+    info = {'r_e': 0, "r_i": 0}
 
     cur_ep_ret = 0
     cur_ep_len = 0
@@ -34,6 +35,8 @@ def traj_segment_generator(pi, env, horizon, stochastic):
 
     # Initialize history arrays
     obs = np.array([ob for _ in range(horizon)])
+    rew_envs = np.zeros(horizon, 'float32')
+    rew_ints = np.zeros(horizon, 'float32')
     rews = np.zeros(horizon, 'float32')
     vpreds = np.zeros(horizon, 'float32')
     news = np.zeros(horizon, 'int32')
@@ -47,7 +50,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         # before returning segment [0, T-1] so we get the correct
         # terminal value
         if t > 0 and t % horizon == 0:
-            yield {"ob" : obs, "rew" : rews, "vpred" : vpreds, "new" : news,
+            yield {"ob" : obs, "rew" : rews, "rew_env": rew_envs, "rew_int": rew_ints, "vpred" : vpreds, "new" : news,
                     "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
                     "ep_rets" : ep_rets, "ep_lens" : ep_lens}
             _, vpred, _, _ = pi.step(ob, stochastic=stochastic)
@@ -62,9 +65,16 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         acs[i] = ac
         prevacs[i] = prevac
 
-        ob, rew, new, _ = env.step(ac)  # new is teminal in env.
+        ob, rew, new, info = env.step(ac)  # new is teminal in env.
         # print('rew: %8.2f' % rew)
         rews[i] = rew
+
+        try:  # for surprise-based
+            rew_envs[i] = info["r_e"]
+            rew_ints[i] = info["r_i"]
+        except KeyError:
+            rew_envs[i] = rew
+            rew_ints[i] = 0
 
         cur_ep_ret += rew
         cur_ep_len += 1
@@ -285,6 +295,7 @@ def learn(*,
     # collect reward data for showing performance
     total_reward = []
     mean_reward = []
+    intrinsic_reward = []
 
     if sum([max_iters>0, total_timesteps>0, max_episodes>0])==0:
         # noththing to be done
@@ -384,15 +395,17 @@ def learn(*,
 
         lens, rews = map(flatten_lists, zip(*listoflrpairs))
         lenbuffer.extend(lens)
-        rewbuffer.extend(rews)
+        # rewbuffer.extend(rews)
 
-        total_reward.append(sum(seg["ep_rets"]))
-        mean_reward.append(sum(seg["ep_rets"])/sum(seg["ep_lens"]))
+        total_reward.append(sum(seg["rew_env"]))
+        mean_reward.append(sum(seg["rew_env"])/sum(seg["ep_lens"]))
+        intrinsic_reward.append(sum(seg["rew_int"])/sum(seg["ep_lens"]))
 
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
-        logger.record_tabular("EpTotalRewMean", np.mean(rewbuffer))
+        # logger.record_tabular("EpTotalRewMean", np.mean(rewbuffer))
+        logger.record_tabular("EpTotalRew", sum(seg["rew_env"]))
         # if not seg["ep_lens"]:
-        logger.record_tabular("EpRew/step", sum(seg["ep_rets"])/sum(seg["ep_lens"]))
+        logger.record_tabular("EpRew/step", sum(seg["rew_env"])/sum(seg["ep_lens"]))
 
         logger.record_tabular("EpThisIter", len(lens))
         episodes_so_far += len(lens)
@@ -406,10 +419,15 @@ def learn(*,
         trainHist = osp.abspath('C:/Users/szhan117/Documents/git_repo/highway-env/models/trainHist')
         sio.savemat(trainHist,
                     {'total_reward': total_reward,
-                     'mean_reward': mean_reward})
+                     'mean_reward': mean_reward,
+                     'intrinsic_reward': intrinsic_reward})
 
         if rank==0:
             logger.dump_tabular()
+
+        # check point for each epsode
+        save_path = osp.abspath('C:/Users/szhan117/Documents/git_repo/highway-env/models/latest')
+        pi.save(save_path)
 
     return pi
 

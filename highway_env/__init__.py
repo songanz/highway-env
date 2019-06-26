@@ -11,6 +11,11 @@ register(
 )
 
 register(
+    id='highway-continuous-intrinsic-rew-v0',
+    entry_point='highway_env.envs:HighwayEnvCon_intrinsic_rew',
+)
+
+register(
     id='merge-v0',
     entry_point='highway_env.envs:MergeEnv',
 )

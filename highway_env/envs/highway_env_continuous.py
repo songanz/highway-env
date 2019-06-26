@@ -6,7 +6,6 @@ from highway_env import utils
 from highway_env.envs.abstract import AbstractEnv
 from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.dynamics import Vehicle
-from surprise_based.net_CVAE import *
 
 
 class HighwayEnvCon(AbstractEnv):
@@ -23,7 +22,7 @@ class HighwayEnvCon(AbstractEnv):
     """
         The frequency at which the system dynamics are simulated [Hz]
     """
-    SIMULATION_FREQUENCY = 50  # todo: change to 20 and try
+    SIMULATION_FREQUENCY = 20  # todo: change to 20 and try
     """
         The frequency at which the agent can take actions [Hz]
     """
@@ -46,6 +45,7 @@ class HighwayEnvCon(AbstractEnv):
         "observation": {
             "type": "Kinematics",
             "FEATURES": ['x', 'y', 'vx', 'vy'],
+            # "FEATURES": ['presence'， 'x', 'y', 'vx', 'vy'],  # dimenstion too high
             "vehicles_count": 7
         },
         "initial_spacing": 2,
@@ -66,7 +66,7 @@ class HighwayEnvCon(AbstractEnv):
         },
         "MEDIUM": {
             "lanes_count": 3,
-            "vehicles_count": 10,
+            "vehicles_count": 20,
             "duration": 30
         },
         "HARD": {
@@ -76,8 +76,9 @@ class HighwayEnvCon(AbstractEnv):
         },
     }
 
-    def __init__(self):
-        config = self.DEFAULT_CONFIG.copy()
+    def __init__(self, config=None):
+        if not config:
+            config = self.DEFAULT_CONFIG.copy()
         config.update(self.DIFFICULTY_LEVELS["MEDIUM"])
         super(HighwayEnvCon, self).__init__(config)
         self.reset()
@@ -177,24 +178,31 @@ class HighwayEnvCon(AbstractEnv):
         rew_y = np.exp(-dy**2/(2*lane_width**2))-1
 
         state_reward = (rew_v + rew_y + rew_x) / 3
-        # state_reward = (rew_v + rew_y) / 2
 
-        # for debug
-        # print('rw: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
-
-        # crash
+        # crash for episode
         if self.vehicle.crashed:
-            # print('crash rw: %8.2f' % (self.config["collision_reward"]))
+            print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
             return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+
         # outside road
-        if self.vehicle.position[1] > ((lane_num - 1) * lane_width + lane_width/2) or \
-                self.vehicle.position[1] < (0 - lane_width/2):
-            # print("vehicle_y: %8.4f;  rw: %8.2f" % (self.vehicle.position[1], self.config["collision_reward"]))
-            return self.config["collision_reward"]  # outside lane boundary
+        lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
+        lane_bound_2 = 0 - lane_width/2  # min y location in lane
+        if self.vehicle.position[1] > lane_bound_1:
+            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1]-lane_bound_1)
+            print("vehicle_y: %8.4f;  rw: %8.2f" % (self.vehicle.position[1], out_lane_punish))
+            return out_lane_punish
+        elif self.vehicle.position[1] < lane_bound_2:
+            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1] - lane_bound_2)
+            print("vehicle_y: %8.4f;  rw: %8.2f" % (self.vehicle.position[1], out_lane_punish))
+            return out_lane_punish
+
         # running in the oppsite direction
         if vx < 0:
-            # print("velocity: %8.4f;  rw: %8.2f" % (vx, self.config["collision_reward"]))
-            return self.config["collision_reward"]*2
+            print("speed: %8.4f;  rw: %8.2f" % (vx, self.config["collision_reward"]*abs(vx)**2))
+            return self.config["collision_reward"]*abs(vx)**2
+
+        # for debug
+        print('rw: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
 
         return state_reward
 
