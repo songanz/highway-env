@@ -22,7 +22,7 @@ DEFAULT_ARGUMENTS = [
     "--activation=tf.tanh",
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
-    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/no_intrinsic_reward_IDM.json",
+    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/IDM.json",
     # last save name must be 'latest'
     "--save_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/Surprise/latest",
     # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
