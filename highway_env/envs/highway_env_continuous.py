@@ -79,7 +79,8 @@ class HighwayEnvCon(AbstractEnv):
     def __init__(self, config=None):
         if not config:
             config = self.DEFAULT_CONFIG.copy()
-        config.update(self.DIFFICULTY_LEVELS["MEDIUM"])
+            config.update(self.DIFFICULTY_LEVELS["MEDIUM"])
+        config.update(self.DIFFICULTY_LEVELS[config["level"]])
         super(HighwayEnvCon, self).__init__(config)
         self.reset()
         self.action_space = spaces.Box(-1., 1., shape=(2,), dtype=np.float32)

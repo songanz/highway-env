@@ -7,6 +7,7 @@ import gym
 from collections import defaultdict
 import tensorflow as tf
 import numpy as np
+import json
 
 from baselines.common.vec_env import VecFrameStack, VecNormalize, VecEnv
 from baselines.common.vec_env.vec_video_recorder import VecVideoRecorder
@@ -75,14 +76,29 @@ def train(args, extra_args):
         if alg_kwargs.get('network') is None:
             alg_kwargs['network'] = get_default_network(env_type)
 
+    if args.save_path:
+        save_path = args.save_path
+    else:
+        save_path = None
+
     print('Training {} on {}:{} with arguments \n{}'.format(args.alg, env_type, env_id, alg_kwargs))
 
-    model = learn(
-        env=env,
-        seed=seed,
-        total_timesteps=total_timesteps,
-        **alg_kwargs
-    )
+    if args.alg == "trpo_mpi":  # I only add save_path argument to trpo_mpi
+        model = learn(
+            env=env,
+            seed=seed,
+            total_timesteps=total_timesteps,
+            save_path=save_path,
+            **alg_kwargs
+        )
+    else:
+        model = learn(
+            env=env,
+            seed=seed,
+            total_timesteps=total_timesteps,
+            **alg_kwargs
+        )
+
 
     return model, env
 
@@ -114,7 +130,17 @@ def build_env(args):
         get_session(config=config)
 
         flatten_dict_observations = alg not in {'her'}
-        env = make_vec_env(env_id, env_type, args.num_env or 1, seed, reward_scale=args.reward_scale, flatten_dict_observations=flatten_dict_observations)
+        if args.env_json:
+            with open(args.env_json) as f:
+                env_kwargs = json.loads(f.read())  # need to corresponding to env.__init__ arguments
+            env = make_vec_env(env_id, env_type, args.num_env or 1, seed,
+                               env_kwargs=env_kwargs,
+                               reward_scale=args.reward_scale,
+                               flatten_dict_observations=flatten_dict_observations)
+        else:
+            env = make_vec_env(env_id, env_type, args.num_env or 1, seed,
+                               reward_scale=args.reward_scale,
+                               flatten_dict_observations=flatten_dict_observations)
 
         if env_type == 'mujoco':
             env = VecNormalize(env, use_tf=True)
@@ -208,7 +234,7 @@ def main(args):
 
     arg_parser = common_arg_parser()
     args, unknown_args = arg_parser.parse_known_args(args)
-    extra_args = parse_cmdline_kwargs(unknown_args)
+    extra_args = parse_cmdline_kwargs(unknown_args)  # unknown_args to a dict
 
     if MPI is None or MPI.COMM_WORLD.Get_rank() == 0:
         rank = 0

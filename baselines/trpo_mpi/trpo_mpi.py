@@ -65,13 +65,13 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         acs[i] = ac
         prevacs[i] = prevac
 
-        ob, rew, new, info = env.step(ac)  # new is teminal in env.
+        ob, rew, new, info = env.step(ac)  # new is teminal in env. info turnout to be a list?!
         # print('rew: %8.2f' % rew)
         rews[i] = rew
 
         try:  # for surprise-based
-            rew_envs[i] = info["r_e"]
-            rew_ints[i] = info["r_i"]
+            rew_envs[i] = info[0]["r_e"]
+            rew_ints[i] = info[0]["r_i"]
         except KeyError:
             rew_envs[i] = rew
             rew_ints[i] = 0
@@ -118,6 +118,7 @@ def learn(*,
         max_episodes=0, max_iters=0,  # time constraint
         callback=None,
         load_path=None,
+        save_path=None,
         **network_kwargs
         ):
     '''
@@ -155,6 +156,8 @@ def learn(*,
     callback                function to be called with (locals(), globals()) each policy optimization step
 
     load_path               str, path to load the model from (default: None, i.e. no model is loaded)
+
+    save_path               str, path to save the model checkpoint
 
     **network_kwargs        keyword arguments to the policy / network builder. See baselines.common/policies.py/build_policy and arguments to a particular type of network
 
@@ -416,7 +419,7 @@ def learn(*,
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
 
-        trainHist = osp.abspath('C:/Users/szhan117/Documents/git_repo/highway-env/models/trainHist')
+        trainHist = osp.expanduser(save_path[:-6]+'trainHist')
         sio.savemat(trainHist,
                     {'total_reward': total_reward,
                      'mean_reward': mean_reward,
@@ -426,8 +429,9 @@ def learn(*,
             logger.dump_tabular()
 
         # check point for each epsode
-        save_path = osp.abspath('C:/Users/szhan117/Documents/git_repo/highway-env/models/latest')
-        pi.save(save_path)
+        if save_path is not None and rank == 0:
+            save_path = osp.expanduser(save_path)
+            pi.save(save_path)
 
     return pi
 

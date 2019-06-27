@@ -11,10 +11,13 @@ from surprise_based.net_CVAE import *
 
 class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
     """Only reward is different, it will consider intrinsic reward"""
-    def __init__(self):  # create CVAE model
+    def __init__(self, config=None):  # create CVAE model
         self.device = 'cpu'
         self.terminal_num = 0
-        super(HighwayEnvCon_intrinsic_rew, self).__init__()
+        if not config:
+            super(HighwayEnvCon_intrinsic_rew, self).__init__()
+        else:
+            super(HighwayEnvCon_intrinsic_rew, self).__init__(config)
         state_size = self.observation_space.shape[0]
         action_size = self.action_space.shape[0]
         latent_size = (self.observation.vehicles_count-1)*action_size
@@ -67,3 +70,5 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                 = getSAT(self.Buf, self.device, num_CVAE=int(32))
             for w in range(5):
                 loss, MSE, KLD = self.env_model.train_step(a_array, s_array, nextS_array, self.device)
+                if k == 19 and w == 4:
+                    print("CVAE finish training, loss: %8.4f" % loss)
