@@ -38,6 +38,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
 
         if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 16:
             self.update_env_model()
+            self.terminal_num += 1
         # calculate intrinsic reward
         rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)
         # update buffer
@@ -47,6 +48,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
             state_reward = rew_env - rew_intrinsic
         else:  # for exploration
             state_reward = rew_env + rew_intrinsic
+        print("state_reward: %8.4f;  rew_env: %8.4f;  rew_i: %8.4f" % (state_reward, rew_env, rew_intrinsic))
 
         info = {'r_e': rew_env, "r_i": rew_intrinsic}
 
@@ -71,4 +73,5 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
             for w in range(5):
                 loss, MSE, KLD = self.env_model.train_step(a_array, s_array, nextS_array, self.device)
                 if k == 19 and w == 4:
-                    print("CVAE finish training, loss: %8.4f" % loss)
+                    print("CVAE finish training, loss: %8.4f;  MSE: %8.4f;  KLD: %8.4f"
+                          % (loss, MSE, KLD))

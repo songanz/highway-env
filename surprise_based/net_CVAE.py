@@ -125,7 +125,7 @@ class Decoder(nn.Module):
 
 class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_size
 
-    ETA = 1.0
+    ETA = 100
 
     def __init__(self, name='network', hidden_size_IP=100, hidden_size_rest=100, alpha=0.01,
                  state_size=2, action_size=2, learning_rate=1e-4,
