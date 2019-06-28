@@ -1,9 +1,7 @@
-import sys
 import os
 import baselines.run as run
 import highway_env  # don't remove, for registration the new game
 import sys
-
 
 # f = open("../models/test.out", 'w')
 # sys.stdout = f

@@ -188,22 +188,23 @@ class HighwayEnvCon(AbstractEnv):
         # outside road
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
         lane_bound_2 = 0 - lane_width/2  # min y location in lane
+
         if self.vehicle.position[1] > lane_bound_1:
             out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1]-lane_bound_1)
-            print("vehicle_y: %8.4f;  rw: %8.2f" % (self.vehicle.position[1], out_lane_punish))
+            print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
             return out_lane_punish
         elif self.vehicle.position[1] < lane_bound_2:
             out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1] - lane_bound_2)
-            print("vehicle_y: %8.4f;  rw: %8.2f" % (self.vehicle.position[1], out_lane_punish))
+            print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
             return out_lane_punish
 
         # running in the oppsite direction
         if vx < 0:
-            print("speed: %8.4f;  rw: %8.2f" % (vx, self.config["collision_reward"]*abs(vx)**2))
+            print("speed: %8.2f;  rew_env: %8.2f" % (vx, self.config["collision_reward"]*abs(vx)**2))
             return self.config["collision_reward"]*abs(vx)**2
 
         # for debug
-        print('rw: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
+        print('rew_env: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
 
         return state_reward
 

@@ -1,4 +1,9 @@
 from collections import deque
+'''only for installed ros computer'''
+import sys
+ros_path = '/opt/ros/kinetic/lib/python2.7/dist-packages'
+if ros_path in sys.path:
+    sys.path.remove(ros_path)
 import cv2
 cv2.ocl.setUseOpenCL(False)
 from .atari_wrappers import WarpFrame, ClipRewardEnv, FrameStack, ScaledFloatFrame

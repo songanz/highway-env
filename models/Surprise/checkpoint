@@ -1,2 +1,2 @@
-model_checkpoint_path: "C:/Users/szhan117/Documents/git_repo/highway-env/models/Surprise/latest"
-all_model_checkpoint_paths: "C:/Users/szhan117/Documents/git_repo/highway-env/models/Surprise/latest"
+model_checkpoint_path: "/home/songanz/Documents/Git_repo/highway-env/models/Surprise/latest"
+all_model_checkpoint_paths: "/home/songanz/Documents/Git_repo/highway-env/models/Surprise/latest"

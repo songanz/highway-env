@@ -74,7 +74,7 @@ class Encoder(nn.Module):
     def forward(self, x, c):
         try:
             x = tr.cat((x, c), dim=1)  # batch setup
-        except IndexError:
+        except (IndexError, RuntimeError):
             x = tr.cat((x, c), dim=0)
 
         try:
@@ -108,7 +108,7 @@ class Decoder(nn.Module):
     def forward(self, z, c):
         try:
             x = tr.cat((z, c), dim=1)  # batch setup
-        except IndexError:
+        except (IndexError, RuntimeError):
             x = tr.cat((z, c), dim=0)
 
         try:
