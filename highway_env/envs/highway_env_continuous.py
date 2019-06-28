@@ -101,13 +101,15 @@ class HighwayEnvCon(AbstractEnv):
         """
             Perform several steps of simulation with constant action
         """
-        for k in range(int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY)):
+        step_per_action = int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY)
+        for k in range(step_per_action):
             if action is not None and self.time % int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY) == 0:
                 # Forward action to the vehicle
                 self.vehicle.act({
-                    "acceleration": action[0] * self.ACCELERATION_RANGE,
-                    "steering": action[1] * self.STEERING_RANGE
+                    "acceleration": action[0] * self.ACCELERATION_RANGE/step_per_action,
+                    "steering": action[1] * self.STEERING_RANGE/step_per_action
                 })
+                print(action[1])
                 self.vehicle.target_velocity = \
                     self.vehicle.velocity + action[0] * (1 / self.SIMULATION_FREQUENCY)
 
