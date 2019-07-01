@@ -14,7 +14,7 @@ class VehicleGraphics(object):
     YELLOW = (200, 200, 0)
     BLACK = (60, 60, 60)
     PURPLE = (200, 0, 150)
-    DEFAULT_COLOR = YELLOW
+    DEFAULT_COLOR = GREEN
     EGO_COLOR = GREEN
 
     @classmethod

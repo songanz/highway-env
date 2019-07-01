@@ -81,8 +81,8 @@ class Encoder(nn.Module):
             x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x)))
             x = nn.LeakyReLU(self.alpha)(self.bn2(self.fc2(x)))
         except ValueError:
-            x = nn.LeakyReLU(self.alpha)(self.fc1(x))
-            x = nn.LeakyReLU(self.alpha)(self.fc2(x))
+            x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x[None])))
+            x = nn.LeakyReLU(self.alpha)(self.bn2(self.fc2(x)))
 
         means = nn.Tanh()(self.z_mean(x))
         log_vars = nn.Tanh()(self.z_log_var(x))
@@ -115,8 +115,8 @@ class Decoder(nn.Module):
             x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x)))
             x = nn.LeakyReLU(self.alpha)(self.bn2(self.fc2(x)))
         except ValueError:
-            x = nn.LeakyReLU(self.alpha)(self.fc1(x))
-            x = nn.LeakyReLU(self.alpha)(self.fc2(x))
+            x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x[None])))
+            x = nn.LeakyReLU(self.alpha)(self.bn2(self.fc2(x)))
 
         x = nn.Tanh()(self.output(x))
 
@@ -175,9 +175,7 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         self.decoder.eval()
 
         x = Variable(tr.from_numpy(next_state_).to(device), requires_grad=False).float()
-        # x = tr.from_numpy(next_state_).to(device).float()
         c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
-        # c = tr.from_numpy(np.hstack((state_, ego_action_))).to(device).float()
         z_means,log_var = self.encoder(x,c)
 
         z_means_numpy = z_means.cpu().detach().numpy()

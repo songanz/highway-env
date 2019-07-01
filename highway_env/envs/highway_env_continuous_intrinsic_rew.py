@@ -1,6 +1,7 @@
 from __future__ import division, print_function, absolute_import
 import numpy as np
 from gym import spaces
+import os
 
 from highway_env import utils
 from highway_env.envs.highway_env_continuous import HighwayEnvCon
@@ -40,7 +41,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
             self.update_env_model()
             self.terminal_num += 1
         # calculate intrinsic reward
-        rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)
+        rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)[0]  # intrinsic_rew return a list
         # update buffer
         self.Buf.remember(old_s, action, rew_env, obs, terminal)
 
@@ -75,3 +76,11 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                 if k == 19 and w == 4:
                     print("CVAE finish training, loss: %8.4f;  MSE: %8.4f;  KLD: %8.4f"
                           % (loss, MSE, KLD))
+        # cwd = os.getcwd()  # get father folder of the scripts folder
+        # CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+        # filename = self.env_model.name + '.pth.tar'
+        # pathname = os.path.join(CVAEdir, filename)
+        # tr.save({
+        #         'state_dict': self.env_model.state_dict(),
+        #         'optimizer': self.env_model.opt.state_dict(),
+        # }, pathname)
