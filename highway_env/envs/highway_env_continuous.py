@@ -28,8 +28,8 @@ class HighwayEnvCon(AbstractEnv):
     """
     POLICY_FREQUENCY = 10
 
-    STEERING_RANGE = np.pi / 4
-    ACCELERATION_RANGE = 5.0
+    STEERING_RANGE = np.pi / 4 / POLICY_FREQUENCY  # original range is for POLICY_FREQUENCY = 1
+    ACCELERATION_RANGE = 5.0 / POLICY_FREQUENCY  # original range is for POLICY_FREQUENCY = 1
 
     SPEED_MAX = 30  # m/s
     NO_COLI_TIME = 2  # at least for 2 seconds there wont be any collision
@@ -50,8 +50,6 @@ class HighwayEnvCon(AbstractEnv):
         },
         "initial_spacing": 2,
         "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
-        # "other_vehicles_type": "highway_env.vehicle.behavior.AggressiveVehicle",
-        # "other_vehicles_type": "highway_env.vehicle.behavior.DefensiveVehicle",
         "screen_width": 600,
         "screen_height": 150,
         "centering_position": [0.3, 0.5],
@@ -157,6 +155,7 @@ class HighwayEnvCon(AbstractEnv):
         x = self.vehicle.position[0]
         v = self.vehicle.velocity
         vx = v * self.vehicle.direction[0]
+        vy = v * self.vehicle.direction[1]
 
         front_veh, rear_veh = self.road.neighbour_vehicles(self.vehicle, lane_index)  # get the front and rear vehicle in the same lane
         try:
@@ -200,7 +199,7 @@ class HighwayEnvCon(AbstractEnv):
             return out_lane_punish
 
         # running in the oppsite direction
-        if vx < 0:
+        if vx < 0 or abs(vy/vx) > 1:
             print("speed: %8.2f;  rew_env: %8.2f" % (vx, self.config["collision_reward"]*abs(vx)**2))
             return self.config["collision_reward"]*abs(vx)**2
 
@@ -220,3 +219,13 @@ class HighwayEnvCon(AbstractEnv):
             The cost signal is the occurrence of collision
         """
         return float(self.vehicle.crashed)
+
+    def in_lane(self):
+        lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
+        lane_width = self.road.network.get_lane(lane_index).width
+        lane_num = len(self.road.network.lanes_list())
+
+        lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
+        lane_bound_2 = 0 - lane_width/2  # min y location in lane
+
+        return lane_bound_2 < self.vehicle.position[1] < lane_bound_1

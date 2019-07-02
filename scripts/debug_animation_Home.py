@@ -11,7 +11,7 @@ DEFAULT_ARGUMENTS = [
     # "--env=highway-continuous-v0",
     "--env=highway-continuous-intrinsic-rew-v0",
     "--alg=trpo_mpi",
-    "--num_timesteps=6e6",  # episode * steps = num_timesteps = 6e6
+    "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
     # "--num_timesteps=1e3",  # testing
 
     # policy net parameter

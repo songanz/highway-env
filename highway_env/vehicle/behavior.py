@@ -21,8 +21,8 @@ class IDMVehicle(ControlledVehicle):
     DELTA = 4.0  # []
 
     # Lateral policy parameters
-    POLITENESS = 0.  # in [0, 1]
-    LANE_CHANGE_MIN_ACC_GAIN = 0.2  # [m/s2]
+    POLITENESS = 0.5  # in [0, 1]
+    LANE_CHANGE_MIN_ACC_GAIN = 0.5  # [m/s2]
     LANE_CHANGE_MAX_BRAKING_IMPOSED = 2.0  # [m/s2]
     LANE_CHANGE_DELAY = 1.0  # [s]
 
@@ -359,7 +359,8 @@ class LinearVehicle(IDMVehicle):
 
 
 class AggressiveVehicle(LinearVehicle):
-    LANE_CHANGE_MIN_ACC_GAIN = 1.0  # [m/s2]
+    LANE_CHANGE_MIN_ACC_GAIN = 0.2  # [m/s2]
+    POLITENESS = 0  # from [0, 1]
     MERGE_ACC_GAIN = 0.8
     MERGE_VEL_RATIO = 0.75
     MERGE_TARGET_VEL = 30
@@ -369,7 +370,8 @@ class AggressiveVehicle(LinearVehicle):
 
 
 class DefensiveVehicle(LinearVehicle):
-    LANE_CHANGE_MIN_ACC_GAIN = 1.0  # [m/s2]
+    LANE_CHANGE_MIN_ACC_GAIN = 1  # [m/s2]
+    POLITENESS = 1  # from [0, 1]
     MERGE_ACC_GAIN = 1.2
     MERGE_VEL_RATIO = 0.75
     MERGE_TARGET_VEL = 30

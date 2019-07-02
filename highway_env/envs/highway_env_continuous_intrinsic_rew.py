@@ -37,7 +37,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
         if terminal:
             self.terminal_num += 1
 
-        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 16:
+        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 32:
             self.update_env_model()
             self.terminal_num += 1
         # calculate intrinsic reward
@@ -47,9 +47,11 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
 
         if fear:  # for runing old policy in new environment
             state_reward = rew_env - rew_intrinsic
-        else:  # for exploration
+        elif self.in_lane():
             state_reward = rew_env + rew_intrinsic
-        print("state_reward: %8.4f;  rew_env: %8.4f;  rew_i: %8.4f" % (state_reward, rew_env, rew_intrinsic))
+        else:  # for exploration
+            state_reward = rew_env
+        # print("state_reward: %8.4f;  rew_env: %8.4f;  rew_i: %8.4f" % (state_reward, rew_env, rew_intrinsic))
 
         info = {'r_e': rew_env, "r_i": rew_intrinsic}
 
@@ -76,11 +78,12 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                 if k == 19 and w == 4:
                     print("CVAE finish training, loss: %8.4f;  MSE: %8.4f;  KLD: %8.4f"
                           % (loss, MSE, KLD))
-        # cwd = os.getcwd()  # get father folder of the scripts folder
-        # CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
-        # filename = self.env_model.name + '.pth.tar'
-        # pathname = os.path.join(CVAEdir, filename)
-        # tr.save({
-        #         'state_dict': self.env_model.state_dict(),
-        #         'optimizer': self.env_model.opt.state_dict(),
-        # }, pathname)
+                    print('Memory: %8.2d' % len(self.Buf.memory))
+        cwd = os.getcwd()  # get father folder of the scripts folder
+        CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+        filename = self.env_model.name + '.pth.tar'
+        pathname = os.path.join(CVAEdir, filename)
+        tr.save({
+                'state_dict': self.env_model.state_dict(),
+                'optimizer': self.env_model.opt.state_dict(),
+        }, pathname)

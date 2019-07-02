@@ -113,7 +113,7 @@ def learn(*,
         seed=None,
         ent_coef=0.0,
         cg_damping=1e-2,
-        vf_stepsize=3e-4,
+        vf_stepsize=1e-5,
         vf_iters =3,
         max_episodes=0, max_iters=0,  # time constraint
         callback=None,
