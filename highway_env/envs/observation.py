@@ -76,21 +76,49 @@ class KinematicObservation(ObservationType):
         :param Dataframe df: observation data
         """
         side_lanes = self.env.road.network.all_side_lanes(self.env.vehicle.lane_index)
-        x_position_range = 5.0 * MDPVehicle.SPEED_MAX
+        x_position_range = 3.0 * MDPVehicle.SPEED_MAX
         y_position_range = AbstractLane.DEFAULT_WIDTH * len(side_lanes)
-        velocity_range = 2*MDPVehicle.SPEED_MAX
+        y_position_range_0 = 0 - AbstractLane.DEFAULT_WIDTH
+        velocity_range = MDPVehicle.SPEED_MAX
+        vy_range = 0.4 * MDPVehicle.SPEED_MAX
         df['x'] = utils.remap(df['x'], [-x_position_range, x_position_range], [-1, 1])
-        df['y'] = utils.remap(df['y'], [-y_position_range, y_position_range], [-1, 1])
+        df['y'] = utils.remap(df['y'], [y_position_range_0, y_position_range], [-1, 1])
         df['vx'] = utils.remap(df['vx'], [-velocity_range, velocity_range], [-1, 1])
-        df['vy'] = utils.remap(df['vy'], [-velocity_range, velocity_range], [-1, 1])
+        df['vy'] = utils.remap(df['vy'], [-vy_range, vy_range], [-1, 1])
         return df
+
+    def reverse_normalize(self, obs):
+        # invers the flatten
+        obs = obs.reshape(-1,4)
+
+        side_lanes = self.env.road.network.all_side_lanes(self.env.vehicle.lane_index)
+        x_position_range = 3.0 * MDPVehicle.SPEED_MAX
+        y_position_range = AbstractLane.DEFAULT_WIDTH * len(side_lanes)
+        y_position_range_0 = 0 - AbstractLane.DEFAULT_WIDTH
+        velocity_range = MDPVehicle.SPEED_MAX
+        vy_range = 0.4 * MDPVehicle.SPEED_MAX
+
+        df = pandas.DataFrame({'x':obs[:,0],'y':obs[:,1],'vx':obs[:,2],'vy':obs[:,3]})
+
+        df['x'] = utils.remap(df['x'], [-1, 1], [-x_position_range, x_position_range])
+        df['y'] = utils.remap(df['y'], [-1, 1], [y_position_range_0, y_position_range])
+        df['vx'] = utils.remap(df['vx'], [-1, 1], [-velocity_range, velocity_range])
+        df['vy'] = utils.remap(df['vy'], [-1, 1], [-vy_range, vy_range])
+
+        return df  # true state
+
 
     def observe(self):
         # Add ego-vehicle
         df = pandas.DataFrame.from_records([self.env.vehicle.to_dict()])[self.features]
+        df['x'][0] = 0  # see explanation in below triple-quoted strings
         # Add nearby traffic
         close_vehicles = self.env.road.closest_vehicles_to(self.env.vehicle, self.vehicles_count - 1)
         if close_vehicles:
+            '''
+            Given the vehicle to v.to_dict() will return relative x.
+            Therefore, no need to carry the absolut position
+            '''
             df = df.append(pandas.DataFrame.from_records(
                 [v.to_dict(self.env.vehicle)
                  for v in close_vehicles[-self.vehicles_count + 1:]])[self.features],
@@ -106,7 +134,8 @@ class KinematicObservation(ObservationType):
         # Clip
         obs = np.clip(df.values, -1, 1)
         # Flatten
-        obs = np.ravel(obs)
+        obs = np.ravel(obs)  # x, y, vx, vy
+
         return obs
 
 

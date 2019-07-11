@@ -29,9 +29,13 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     info = {'r_e': 0, "r_i": 0}
 
     cur_ep_ret = 0
+    cur_ep_env_rew = 0
     cur_ep_len = 0
+    cur_ep_int_rew = 0
     ep_rets = []
     ep_lens = []
+    ep_env_rets = []
+    ep_int_rets = []
 
     # Initialize history arrays
     obs = np.array([ob for _ in range(horizon)])
@@ -50,14 +54,17 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         # before returning segment [0, T-1] so we get the correct
         # terminal value
         if t > 0 and t % horizon == 0:
-            yield {"ob" : obs, "rew" : rews, "rew_env": rew_envs, "rew_int": rew_ints, "vpred" : vpreds, "new" : news,
-                    "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
-                    "ep_rets" : ep_rets, "ep_lens" : ep_lens}
+            yield {"ob" : obs, "rew" : rews, "rew_env": rew_envs, "rew_int": rew_ints,
+                   "vpred" : vpreds, "new" : news,
+                   "ac" : acs, "prevac" : prevacs, "nextvpred": vpred * (1 - new),
+                   "ep_rets" : ep_rets, "ep_lens" : ep_lens, "ep_env_rets": ep_env_rets, "ep_int_rets": ep_int_rets}
             _, vpred, _, _ = pi.step(ob, stochastic=stochastic)
             # Be careful!!! if you change the downstream algorithm to aggregate
             # several of these batches, then be sure to do a deepcopy
             ep_rets = []
             ep_lens = []
+            ep_env_rets = []
+            ep_int_rets = []
         i = t % horizon
         obs[i] = ob
         vpreds[i] = vpred
@@ -66,6 +73,13 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         prevacs[i] = prevac
 
         ob, rew, new, info = env.step(ac)  # new is teminal in env. info turnout to be a list?!
+
+        # try:
+        #     if env.imagine:
+        #         rew_im, ob_im, new_im = env.imagine_(ac, ob)
+        # except AttributeError:
+        #     pass
+
         # print('rew: %8.2f' % rew)
         rews[i] = rew
 
@@ -77,14 +91,20 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             rew_ints[i] = 0
 
         cur_ep_ret += rew
+        cur_ep_env_rew += rew_envs[i]
+        cur_ep_int_rew += rew_ints[i]
         cur_ep_len += 1
 
         # the environment can teminate because of collision or duration. Several ep per horizon
         if new or (t > 0 and (t+1) % horizon == 0):
             ep_rets.append(cur_ep_ret)
             ep_lens.append(cur_ep_len)
+            ep_env_rets.append(cur_ep_env_rew)
+            ep_int_rets.append(cur_ep_int_rew)
             cur_ep_ret = 0
             cur_ep_len = 0
+            cur_ep_env_rew = 0
+            cur_ep_int_rew = 0
             ob = env.reset()
         t += 1
 
@@ -105,7 +125,7 @@ def learn(*,
         network,
         env,
         total_timesteps,
-        timesteps_per_batch=256,  # what to train on
+        timesteps_per_batch=1024,  # what to train on
         max_kl=0.001,
         cg_iters=10,
         gamma=0.99,
@@ -294,9 +314,10 @@ def learn(*,
     tstart = time.time()
     lenbuffer = deque(maxlen=40) # rolling buffer for episode lengths
     rewbuffer = deque(maxlen=40) # rolling buffer for episode rewards
+    ave_env_rewbuffer = deque(maxlen=40)
+    intrewbuffer = deque(maxlen=40)
 
     # collect reward data for showing performance
-    total_reward = []
     mean_reward = []
     intrinsic_reward = []
 
@@ -390,26 +411,29 @@ def learn(*,
 
         logger.record_tabular("ev_tdlam_before", explained_variance(vpredbefore, tdlamret))
 
-        lrlocal = (seg["ep_lens"], seg["ep_rets"])  # local values
+        lrlocal = (seg["ep_lens"], seg["ep_env_rets"])  # for evaluate, memory environment rewards
+        lrlocal_int = (seg["ep_lens"], seg["ep_int_rets"])
         if MPI is not None:
             listoflrpairs = MPI.COMM_WORLD.allgather(lrlocal)  # list of tuples
+            listoflrpairs_int = MPI.COMM_WORLD.allgather(lrlocal_int)  # list of tuples
         else:
             listoflrpairs = [lrlocal]
+            listoflrpairs_int = [lrlocal_int]
 
         lens, rews = map(flatten_lists, zip(*listoflrpairs))
+        _, rew_int = map(flatten_lists, zip(*listoflrpairs_int))
         lenbuffer.extend(lens)
-        # rewbuffer.extend(rews)
+        rewbuffer.extend(rews)
+        intrewbuffer.extend(rew_int)
+        ave_env_rewbuffer.extend(np.array(rewbuffer)/np.array(lenbuffer))
 
-        total_reward.append(sum(seg["rew_env"]))
-        mean_reward.append(sum(seg["rew_env"])/sum(seg["ep_lens"]))
-        intrinsic_reward.append(sum(seg["rew_int"])/sum(seg["ep_lens"]))
+        mean_reward.append(np.mean(ave_env_rewbuffer))
+        intrinsic_reward.append(np.mean(np.array(intrewbuffer)/np.array(lenbuffer)))
 
         logger.record_tabular("EpLenMean", np.mean(lenbuffer))
-        # logger.record_tabular("EpTotalRewMean", np.mean(rewbuffer))
-        logger.record_tabular("EpTotalRew", sum(seg["rew_env"]))
-        # if not seg["ep_lens"]:
-        logger.record_tabular("EpRew/step", sum(seg["rew_env"])/sum(seg["ep_lens"]))
-
+        logger.record_tabular("EpTotalRewMean", np.mean(rewbuffer))
+        logger.record_tabular("EpRew/step", np.mean(ave_env_rewbuffer))
+        logger.record_tabular("EpIntrinsicRew/step", np.mean(np.array(intrewbuffer)/np.array(lenbuffer)))
         logger.record_tabular("EpThisIter", len(lens))
         episodes_so_far += len(lens)
         timesteps_so_far += sum(lens)
@@ -421,8 +445,7 @@ def learn(*,
 
         trainHist = osp.expanduser(save_path[:-6]+'trainHist')
         sio.savemat(trainHist,
-                    {'total_reward': total_reward,
-                     'mean_reward': mean_reward,
+                    {'mean_reward': mean_reward,
                      'intrinsic_reward': intrinsic_reward})
 
         if rank==0:

@@ -156,7 +156,7 @@ class AbstractEnv(gym.Env):
 
         obs = self.observation.observe()
         reward = self._reward(action)
-        terminal = self._is_terminal()
+        terminal = self._is_terminal() or self.done
 
         cost = self._cost(action)
         info = {'cost': cost, "c_": cost}

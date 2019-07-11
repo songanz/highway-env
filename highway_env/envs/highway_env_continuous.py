@@ -88,6 +88,7 @@ class HighwayEnvCon(AbstractEnv):
         self._create_road()
         self._create_vehicles()
         self.steps = 0
+        self.done = False
         return super(HighwayEnvCon, self).reset()
 
     def step(self, action):
@@ -120,6 +121,7 @@ class HighwayEnvCon(AbstractEnv):
             # Stop at terminal states
             if self.done or self._is_terminal():
                 break
+
         self.enable_auto_render = False
 
     def _create_road(self):
@@ -166,7 +168,6 @@ class HighwayEnvCon(AbstractEnv):
             dx = self.M_ACL_DIST
 
         sfDist = (self.NOM_DIST * self.LEN_SCL) + (vx - front_veh_vx) * self.NO_COLI_TIME  # calculate safe distance
-        # midDis = sfDist + (self.M_ACL_DIST - sfDist) / self.LEN_SCL
 
         # keep safe distance
         rew_x = 0
@@ -174,9 +175,9 @@ class HighwayEnvCon(AbstractEnv):
             # print('dx: %8.4f;  sfDist: %8.4f' % (dx, sfDist))
             rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
-        rew_v = np.exp(-(v - self.SPEED_MAX)**2/(2*2*self.ACCELERATION_RANGE**2))-1
+        rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(6*self.ACCELERATION_RANGE)**2))-1
         # in the center of lane
-        rew_y = np.exp(-dy**2/(2*lane_width**2))-1
+        rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
 
         state_reward = (rew_v + rew_y + rew_x) / 3
 
@@ -189,22 +190,32 @@ class HighwayEnvCon(AbstractEnv):
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
         lane_bound_2 = 0 - lane_width/2  # min y location in lane
 
+        if self.vehicle.position[1] > lane_bound_1 + lane_width/2 or\
+                self.vehicle.position[1] < lane_bound_2 - lane_width/2:
+            self.done = True
+            print("vehicle_y: %8.2f;  rew_env: %8.2f"
+                  % (self.vehicle.position[1],
+                     self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY))
+            return self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY
+
         if self.vehicle.position[1] > lane_bound_1:
-            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1]-lane_bound_1)
+            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1]-lane_bound_1) - 5
             print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
             return out_lane_punish
         elif self.vehicle.position[1] < lane_bound_2:
-            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1] - lane_bound_2)
+            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1] - lane_bound_2) - 5
             print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
             return out_lane_punish
 
         # running in the oppsite direction
         if vx < 0 or abs(vy/vx) > 1:
-            print("speed: %8.2f;  rew_env: %8.2f" % (vx, self.config["collision_reward"]*abs(vx)**2))
-            return self.config["collision_reward"]*abs(vx)**2
+            velocity_heading_punish = self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+            self.done = True
+            print("speed: %8.2f;  rew_env: %8.2f" % (vx, velocity_heading_punish))
+            return velocity_heading_punish
 
         # for debug
-        print('rew_env: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
+        # print('rew_env: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
 
         return state_reward
 

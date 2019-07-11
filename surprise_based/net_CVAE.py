@@ -75,7 +75,7 @@ class Encoder(nn.Module):
         try:
             x = tr.cat((x, c), dim=1)  # batch setup
         except (IndexError, RuntimeError):
-            x = tr.cat((x, c), dim=0)
+            x = tr.cat((tr.squeeze(x), tr.squeeze(c)), dim=0)
 
         try:
             x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x)))
@@ -109,7 +109,7 @@ class Decoder(nn.Module):
         try:
             x = tr.cat((z, c), dim=1)  # batch setup
         except (IndexError, RuntimeError):
-            x = tr.cat((z, c), dim=0)
+            x = tr.cat((tr.squeeze(z), tr.squeeze(c)), dim=0)
 
         try:
             x = nn.LeakyReLU(self.alpha)(self.bn1(self.fc1(x)))
@@ -125,7 +125,7 @@ class Decoder(nn.Module):
 
 class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_size
 
-    ETA = 1000
+    ETA = 2
 
     def __init__(self, name='network', hidden_size_IP=100, hidden_size_rest=100, alpha=0.01,
                  state_size=2, action_size=2, learning_rate=1e-4,
@@ -142,6 +142,7 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         self.encoder = Encoder(hidden_size_IP, hidden_size_rest, alpha, state_size, latent_size, condi_size)
         self.decoder = Decoder(hidden_size_IP, hidden_size_rest, alpha, state_size, latent_size, condi_size)
         self.opt = tr.optim.Adam(self.parameters(), lr=self.lr)
+        self.done = False
 
     def forward(self, x, c, device):
         # x: input, c: condition
@@ -161,14 +162,37 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
 
         return MSE + KL_D, MSE, KL_D
 
-    def sample_x(self, ego_action_, state_):
-        c = Variable(tr.from_numpy(np.hstack((state_, ego_action_[:, np.newaxis]))), requires_grad=False).float()
-        batch_size = c.shape[0]
-        z = Variable(tr.randn((batch_size, self.latent_size)), requires_grad=False)
-        recon_x = self.decoder(z, c)
-        next_state = self.dynamic(recon_x, c)
+    def sample_next_s(self, ego_action_, state_, env):
 
-        return next_state
+        c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))), requires_grad=False).float()
+        c = tr.squeeze(c)
+        if len(c.shape) == 1:
+            batch_size = 1
+        else:
+            batch_size = c.shape[0]
+        z = Variable(tr.randn((batch_size, self.latent_size)), requires_grad=False)
+        next_state = self.decoder(z, c)
+        next_state = next_state.data.numpy()
+        rew = self.calculate_rew(env, state_)
+        return rew, next_state
+
+    # def bonus_reward_each_state(self, ego_action_, state_, next_state_, rewards, device):
+    #     self.encoder.eval()
+    #     self.decoder.eval()
+    #
+    #     x = Variable(tr.from_numpy(next_state_).to(device), requires_grad=False).float()
+    #     c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
+    #     z_means,log_var = self.encoder(x,c)
+    #
+    #     z_means_numpy = z_means.cpu().detach().numpy()
+    #     standar_normal = {"mean": np.zeros(z_means_numpy.shape),
+    #                       "log_std": np.zeros(z_means_numpy.shape)}
+    #     KL_D = log_likelihood(z_means_numpy, standar_normal) - log_likelihood(np.zeros(z_means_numpy.shape), standar_normal)
+    #     # KL_D = -0.5 * tr.sum(1 + log_var - z_means.pow(2) - log_var.exp())
+    #     # KL_D = KL_D.cpu().detach().numpy()
+    #     eta = self.eta/max((1, np.mean(rewards)))
+    #     bonus = -KL_D*eta
+    #     return bonus, KL_D, z_means_numpy
 
     def bonus_reward_each_state(self, ego_action_, state_, next_state_, rewards, device):
         self.encoder.eval()
@@ -176,17 +200,15 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
 
         x = Variable(tr.from_numpy(next_state_).to(device), requires_grad=False).float()
         c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
-        z_means,log_var = self.encoder(x,c)
 
-        z_means_numpy = z_means.cpu().detach().numpy()
-        standar_normal = {"mean": np.zeros(z_means_numpy.shape),
-                          "log_std": np.zeros(z_means_numpy.shape)}
-        KL_D = log_likelihood(z_means_numpy, standar_normal) - log_likelihood(np.zeros(z_means_numpy.shape), standar_normal)
-        # KL_D = -0.5 * tr.sum(1 + log_var - z_means.pow(2) - log_var.exp())
-        # KL_D = KL_D.cpu().detach().numpy()
-        eta = self.eta/max((1, np.mean(rewards)))
-        bonus = -KL_D*eta
-        return bonus, KL_D, z_means_numpy
+        recon_next_state, mean, log_var = self.forward(x, c, device)
+        loss, _, KL_D = self.loss_fun(mean, log_var, x, recon_next_state)
+        loss_for_bonus_rew = loss.data.numpy()*100
+
+        eta = self.eta/max((1, np.mean(loss_for_bonus_rew)))
+
+        bonus = loss_for_bonus_rew*eta
+        return bonus, KL_D, mean
 
     def train_step(self, ego_action_, state_, next_state_, device):
         self.encoder.train()
@@ -203,3 +225,96 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         self.opt.step()
 
         return loss, MSE, KL_D
+
+    def calculate_rew(self, env, state_):
+        true_state = env.observation.reverse_normalize(state_)  # dataframe
+
+        y = true_state['y'][0]
+        vx = true_state['vx'][0]
+        vy = true_state['vy'][0]
+
+        lane_index = env.road.network.get_closest_lane_index(env.vehicle.position)
+        lane_width = env.road.network.get_lane(lane_index).width
+        lane_num = len(env.road.network.lanes_list())
+        lanes_center = [lane_width * i for i in range(lane_num)]
+
+        def find_nearest(array, value):
+            array = np.asarray(array)
+            idx = (np.abs(array - value)).argmin()
+            return idx, array[idx]
+
+        def find_nearest_front(array, value):
+            array = np.asarray(array)
+            array -= value
+            array = list(array)
+            m = min(i for i in array if i > 0)
+            return array.index(m), m + value
+
+        def check_collision(df):
+            p = np.array([df['x'][0], df['y'][0]])
+            for i in range(1, df.shape[0]):
+                other_p = np.array([df['x'][i], df['y'][i]])
+                if np.linalg.norm(other_p - p) < np.linalg.norm([env.vehicle.LENGTH, env.vehicle.WIDTH]):
+                    return True
+            return False
+
+        # find dy
+        which_lane, lane_cen = find_nearest(lanes_center, y)
+        dy = np.abs(lane_cen - y)
+
+        # find dx
+        temp_x = []
+        temp_v = []
+        for i in range(1, true_state.shape[0]):
+            if find_nearest(lanes_center, true_state['y'][i])[0] == which_lane:
+                temp_x.append(true_state['x'][i])
+                temp_v.append(true_state['vx'][i])
+
+        if not temp_x:
+            dx = env.M_ACL_DIST
+            front_veh_vx = env.SPEED_MAX
+        else:
+            j, dx = find_nearest_front(temp_x, 0)  # becuase the position of host car is 0
+            front_veh_vx = temp_v[j]
+
+        # rew_x
+        # keep safe distance
+        sfDist = (env.NOM_DIST * env.LEN_SCL) + (vx - front_veh_vx) * env.NO_COLI_TIME  # calculate safe distance
+        rew_x = 0
+        if dx < sfDist * env.SAFE_FACTOR:
+            rew_x = np.exp(-(dx - sfDist * env.SAFE_FACTOR) ** 2 / (2 * env.NOM_DIST ** 2)) - 1
+        # rew_y
+        # in the center of lane
+        rew_y = np.exp(-dy ** 2 / (0.1 * lane_width ** 2)) - 1
+        # rew_v
+        # run as quick as possible but not speeding
+        rew_v = np.exp(-(vx - env.SPEED_MAX) ** 2 / (2 * 2 * (6 * env.ACCELERATION_RANGE) ** 2)) - 1
+
+        state_reward = (rew_v + rew_y + rew_x) / 3
+
+        if check_collision(true_state):
+            self.done = True
+            return env.config["collision_reward"] * env.config["duration"] * env.POLICY_FREQUENCY
+
+        # outside road
+        lane_bound_1 = (lane_num - 1) * lane_width + lane_width / 2  # max y location in lane
+        lane_bound_2 = 0 - lane_width / 2  # min y location in lane
+
+        if y > lane_bound_1 + lane_width / 2 or y < lane_bound_2 - lane_width / 2:
+            self.done = True
+            return env.config["collision_reward"] * env.config["duration"] * env.POLICY_FREQUENCY
+
+        if y > lane_bound_1:
+            out_lane_punish = env.config["collision_reward"] * 2 * abs(y - lane_bound_1) - 5
+            return out_lane_punish
+        elif y < lane_bound_2:
+            out_lane_punish = env.config["collision_reward"] * 2 * abs(y - lane_bound_2) - 5
+            return out_lane_punish
+
+        # running in the oppsite direction
+        if vx < 0 or abs(vy / vx) > 1:
+            self.done = True
+            velocity_heading_punish = env.config["collision_reward"] * env.config["duration"] * env.POLICY_FREQUENCY
+            return velocity_heading_punish
+
+        return state_reward

@@ -180,8 +180,8 @@ class Vehicle(Loggable):
         }
         if origin_vehicle:
             origin_dict = origin_vehicle.to_dict()
-            for key in ['x', 'y', 'vx', 'vy']:
-                d[key] -= origin_dict[key]
+            for key in ['x']:
+                d[key] -= origin_dict[key]  # relative x
         return d
 
     def dump(self):

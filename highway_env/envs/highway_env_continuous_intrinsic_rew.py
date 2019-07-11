@@ -29,6 +29,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                               latent_size=latent_size,
                               condi_size=condi_size)
         self.Buf = Memory(MemLen=int(1e5))
+        # self.imagine = True
 
     def step(self, action, fear=False):
         old_s = self.observation.observe()
@@ -41,7 +42,11 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
             self.update_env_model()
             self.terminal_num += 1
         # calculate intrinsic reward
-        rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)[0]  # intrinsic_rew return a list
+        try:
+            rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)[0]  # intrinsic_rew return a list for old def
+        except IndexError:
+            rew_intrinsic = self.intrinsic_rew(old_s, obs, action, rew_env)  # intrinsic_rew return a number
+
         # update buffer
         self.Buf.remember(old_s, action, rew_env, obs, terminal)
 
@@ -87,3 +92,7 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                 'state_dict': self.env_model.state_dict(),
                 'optimizer': self.env_model.opt.state_dict(),
         }, pathname)
+
+    # def imagine_(self, ac, obs):
+    #     imagine_env_rew, imagine_next_state = self.env_model.sample_next_s(ac, obs, self)
+    #     return imagine_env_rew, imagine_next_state, self.env_model.done
