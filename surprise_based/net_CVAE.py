@@ -163,6 +163,8 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         return MSE + KL_D, MSE, KL_D
 
     def sample_next_s(self, ego_action_, state_, env):
+        self.encoder.eval()
+        self.decoder.eval()
 
         c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))), requires_grad=False).float()
         c = tr.squeeze(c)
@@ -270,7 +272,8 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
                 temp_x.append(true_state['x'][i])
                 temp_v.append(true_state['vx'][i])
 
-        if not temp_x:
+        if not [i for i in temp_x if i > 0]:
+            # no car in the same lane or no car in front in the same lane
             dx = env.M_ACL_DIST
             front_veh_vx = env.SPEED_MAX
         else:

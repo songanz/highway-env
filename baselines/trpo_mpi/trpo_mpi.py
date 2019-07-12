@@ -13,6 +13,7 @@ from baselines.common.policies import build_policy
 from contextlib import contextmanager
 import scipy.io as sio
 import os.path as osp
+from copy import deepcopy
 
 try:
     from mpi4py import MPI
@@ -23,10 +24,16 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     # Initialize state variables
     t = 0
     ac = env.action_space.sample()
+    prevac = ac.copy()
     new = True
     rew = 0.0
     ob = env.reset()
+    ob_im = ob.copy()
     info = {'r_e': 0, "r_i": 0}
+    info_temp = {'r_e': 0, 'r_i': 0}
+    vpred = 0
+    vpred_im_mc = []
+    new_im = True
 
     cur_ep_ret = 0
     cur_ep_env_rew = 0
@@ -48,8 +55,16 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     prevacs = acs.copy()
 
     while True:
-        prevac = ac
-        ac, vpred, _, _ = pi.step(ob, stochastic=stochastic)
+        try:
+            im_counter = info_temp['imagine']
+            ac_im, _, _, _ = pi.step(ob_im, stochastic=stochastic)
+            if new_im:
+                ac_im = deepcopy(ac)
+        except KeyError:
+            prevac = ac
+            ac, vpred, _, _ = pi.step(ob, stochastic=stochastic)
+            ac_im = deepcopy(ac)
+            vpred_im_mc = []
         # Slight weirdness here because we need value function at time T
         # before returning segment [0, T-1] so we get the correct
         # terminal value
@@ -67,25 +82,34 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             ep_int_rets = []
         i = t % horizon
         obs[i] = ob
-        vpreds[i] = vpred
+        vpreds[i] = vpred_im_mc.append(vpred)
         news[i] = new
         acs[i] = ac
         prevacs[i] = prevac
 
-        ob, rew, new, info = env.step(ac)  # new is teminal in env. info turnout to be a list?!
+        ob_temp, rew_temp, new_temp, info_temp = env.step(ac_im)
+        info_temp = info_temp[0]
 
-        # try:
-        #     if env.imagine:
-        #         rew_im, ob_im, new_im = env.imagine_(ac, ob)
-        # except AttributeError:
-        #     pass
+        try:
+            im_counter = info_temp['imagine']
+            ob_im = ob_temp
+            rew_im = rew_temp
+            new_im = new_temp
+            if new_im:
+                vpred_im_mc.append(info_temp['vpred_im_mc'])
+            continue
 
-        # print('rew: %8.2f' % rew)
+        except KeyError:
+            ob = ob_temp
+            rew = rew_temp
+            new = new_temp
+            info = info_temp
+
         rews[i] = rew
 
         try:  # for surprise-based
-            rew_envs[i] = info[0]["r_e"]
-            rew_ints[i] = info[0]["r_i"]
+            rew_envs[i] = info["r_e"]
+            rew_ints[i] = info["r_i"]
         except KeyError:
             rew_envs[i] = rew
             rew_ints[i] = 0
@@ -141,7 +165,7 @@ def learn(*,
         save_path=None,
         **network_kwargs
         ):
-    '''
+    """
     learn a policy function with TRPO algorithm
 
     Parameters:
@@ -186,7 +210,7 @@ def learn(*,
 
     learnt model
 
-    '''
+    """
 
     if MPI is not None:
         nworkers = MPI.COMM_WORLD.Get_size()

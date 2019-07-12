@@ -16,6 +16,11 @@ register(
 )
 
 register(
+    id='highway-continuous-imagine-v0',
+    entry_point='highway_env.envs:HighwayEnvCon_imagine',
+)
+
+register(
     id='merge-v0',
     entry_point='highway_env.envs:MergeEnv',
 )

@@ -10,15 +10,15 @@ from highway_env.vehicle.dynamics import Vehicle
 from surprise_based.net_CVAE import *
 
 
-class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
+class HighwayEnvCon_imagine(HighwayEnvCon):
     """Only reward is different, it will consider intrinsic reward"""
     def __init__(self, config=None):  # create CVAE model
         self.device = 'cpu'
         self.terminal_num = 0
         if not config:
-            super(HighwayEnvCon_intrinsic_rew, self).__init__()
+            super(HighwayEnvCon_imagine, self).__init__()
         else:
-            super(HighwayEnvCon_intrinsic_rew, self).__init__(config)
+            super(HighwayEnvCon_imagine, self).__init__(config)
         state_size = self.observation_space.shape[0]
         action_size = self.action_space.shape[0]
         latent_size = (self.observation.vehicles_count-1)*action_size
@@ -30,9 +30,43 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                               condi_size=condi_size)
         self.Buf = Memory(MemLen=int(1e5))
 
+        # for imagination rollouts
+        self.load_CVAE()
+        self.imagine = True
+        self.imagine_step = 64
+        self.im_counter = 0
+        self.im_old_ob = self.observation.observe()
+        self.vpred_im_mc = 0
+        self.im_path_num = 0
+
     def step(self, action, fear=False):
+        gamma = 0.99
+        while self.im_path_num <= 5:
+            while self.imagine:
+                if self.im_counter == 0:
+                    self.im_old_ob = self.observation.observe()
+                    self.vpred_im_mc = 0
+                if self.env_model.done or self.im_counter > 32:
+                    self.env_model.done = False
+                    self.im_counter = 0
+                    self.im_path_num += 1
+                    break
+
+                ob_next_im, rew_im, new_im= self.imagine_(action, self.im_old_ob)
+
+                self.vpred_im_mc += np.power(gamma, self.im_counter)*rew_im
+
+                info = {'imagine': self.im_counter, 'vpred_im_mc': self.vpred_im_mc}
+
+                self.im_counter += 1
+                self.im_old_ob = np.squeeze(ob_next_im)
+
+                return ob_next_im, rew_im, new_im, info
+
+        self.im_path_num = 0
         old_s = self.observation.observe()
-        obs, rew_env, terminal, _ = super(HighwayEnvCon_intrinsic_rew, self).step(action)
+
+        obs, rew_env, terminal, _ = super(HighwayEnvCon_imagine, self).step(action)
 
         if terminal:
             self.terminal_num += 1
@@ -56,7 +90,6 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
         else:  # for exploration
             state_reward = rew_env
         # print("state_reward: %8.4f;  rew_env: %8.4f;  rew_i: %8.4f" % (state_reward, rew_env, rew_intrinsic))
-
         info = {'r_e': rew_env, "r_i": rew_intrinsic}
 
         return obs, state_reward, terminal, info
@@ -83,11 +116,22 @@ class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
                     print("CVAE finish training, loss: %8.4f;  MSE: %8.4f;  KLD: %8.4f"
                           % (loss, MSE, KLD))
                     print('Memory: %8.2d' % len(self.Buf.memory))
+        # cwd = os.getcwd()  # get father folder of the scripts folder
+        # CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+        # filename = self.env_model.name + '.pth.tar'
+        # pathname = os.path.join(CVAEdir, filename)
+        # tr.save({
+        #         'state_dict': self.env_model.state_dict(),
+        #         'optimizer': self.env_model.opt.state_dict(),
+        # }, pathname)
+
+    def imagine_(self, ac, obs):
+        imagine_env_rew, imagine_next_state = self.env_model.sample_next_s(ac, obs, self)
+        return imagine_next_state, imagine_env_rew, self.env_model.done
+
+    def load_CVAE(self):
         cwd = os.getcwd()  # get father folder of the scripts folder
         CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
         filename = self.env_model.name + '.pth.tar'
         pathname = os.path.join(CVAEdir, filename)
-        tr.save({
-                'state_dict': self.env_model.state_dict(),
-                'optimizer': self.env_model.opt.state_dict(),
-        }, pathname)
+        self.env_model.load_state_dict(tr.load(pathname))
