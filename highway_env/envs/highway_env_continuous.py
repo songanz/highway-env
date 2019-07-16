@@ -22,7 +22,7 @@ class HighwayEnvCon(AbstractEnv):
     """
         The frequency at which the system dynamics are simulated [Hz]
     """
-    SIMULATION_FREQUENCY = 20  # todo: change to 20 and try
+    SIMULATION_FREQUENCY = 20
     """
         The frequency at which the agent can take actions [Hz]
     """

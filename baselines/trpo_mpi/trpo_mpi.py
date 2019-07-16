@@ -56,7 +56,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
 
     while True:
         try:
-            im_counter = info_temp['imagine']
+            _ = info_temp['imagine']
             ac_im, _, _, _ = pi.step(ob_im, stochastic=stochastic)
             if new_im:
                 ac_im = deepcopy(ac)
@@ -64,7 +64,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             prevac = ac
             ac, vpred, _, _ = pi.step(ob, stochastic=stochastic)
             ac_im = deepcopy(ac)
-            vpred_im_mc = []
+            vpred_im_mc = [vpred[0]]
         # Slight weirdness here because we need value function at time T
         # before returning segment [0, T-1] so we get the correct
         # terminal value
@@ -82,7 +82,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             ep_int_rets = []
         i = t % horizon
         obs[i] = ob
-        vpreds[i] = vpred_im_mc.append(vpred)
+        vpreds[i] = np.mean(vpred_im_mc)
         news[i] = new
         acs[i] = ac
         prevacs[i] = prevac
@@ -91,9 +91,8 @@ def traj_segment_generator(pi, env, horizon, stochastic):
         info_temp = info_temp[0]
 
         try:
-            im_counter = info_temp['imagine']
+            _ = info_temp['imagine']
             ob_im = ob_temp
-            rew_im = rew_temp
             new_im = new_temp
             if new_im:
                 vpred_im_mc.append(info_temp['vpred_im_mc'])
@@ -149,7 +148,7 @@ def learn(*,
         network,
         env,
         total_timesteps,
-        timesteps_per_batch=1024,  # what to train on
+        timesteps_per_batch=128,  # what to train on
         max_kl=0.001,
         cg_iters=10,
         gamma=0.99,

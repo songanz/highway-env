@@ -41,12 +41,12 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
 
     def step(self, action, fear=False):
         gamma = 0.99
-        while self.im_path_num <= 5:
+        while self.im_path_num < 3:
             while self.imagine:
                 if self.im_counter == 0:
                     self.im_old_ob = self.observation.observe()
                     self.vpred_im_mc = 0
-                if self.env_model.done or self.im_counter > 32:
+                if self.env_model.done or self.im_counter > 8:
                     self.env_model.done = False
                     self.im_counter = 0
                     self.im_path_num += 1
@@ -116,14 +116,14 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                     print("CVAE finish training, loss: %8.4f;  MSE: %8.4f;  KLD: %8.4f"
                           % (loss, MSE, KLD))
                     print('Memory: %8.2d' % len(self.Buf.memory))
-        # cwd = os.getcwd()  # get father folder of the scripts folder
-        # CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
-        # filename = self.env_model.name + '.pth.tar'
-        # pathname = os.path.join(CVAEdir, filename)
-        # tr.save({
-        #         'state_dict': self.env_model.state_dict(),
-        #         'optimizer': self.env_model.opt.state_dict(),
-        # }, pathname)
+        cwd = os.getcwd()  # get father folder of the scripts folder
+        CVAEdir = os.path.abspath(cwd + '/models/Imagine/')
+        filename = self.env_model.name + '.pth.tar'
+        pathname = os.path.join(CVAEdir, filename)
+        tr.save({
+                'state_dict': self.env_model.state_dict(),
+                'optimizer': self.env_model.opt.state_dict(),
+        }, pathname)
 
     def imagine_(self, ac, obs):
         imagine_env_rew, imagine_next_state = self.env_model.sample_next_s(ac, obs, self)
@@ -134,4 +134,9 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
         filename = self.env_model.name + '.pth.tar'
         pathname = os.path.join(CVAEdir, filename)
-        self.env_model.load_state_dict(tr.load(pathname))
+        ckpt = tr.load(pathname)
+        self.env_model.load_state_dict(ckpt['state_dict'])
+        self.env_model.opt.load_state_dict(ckpt['optimizer'])
+
+    # todo check imagination path by visualization
+    # def check_im(self, ob, is_im=True):
