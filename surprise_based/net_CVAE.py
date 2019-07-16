@@ -157,7 +157,7 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         return next_state, latent_mean, latent_log_var
 
     def loss_fun(self, mean, log_var, nexs_state, recon_next_state):
-        MSE = nn.MSELoss(reduction='elementwise_mean')(recon_next_state, nexs_state)
+        MSE = nn.MSELoss(reduction='mean')(recon_next_state, nexs_state)
         KL_D = -0.5 * tr.sum(1 + log_var - mean.pow(2) - log_var.exp())
 
         return MSE + KL_D, MSE, KL_D

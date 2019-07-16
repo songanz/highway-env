@@ -17,7 +17,6 @@ from baselines.common import policies, input
 from baselines import logger
 import baselines.common.tf_util as U
 from importlib import import_module
-from baselines.ppo2 import ppo2
 
 try:
     from mpi4py import MPI
