@@ -1,0 +1,17 @@
+{
+    "config":{
+      "level": "MEDIUM",
+      "observation": {
+                  "type": "Kinematics",
+                  "FEATURES": ["x", "y", "vx", "vy"],
+                  "vehicles_count": 7
+              },
+      "initial_spacing": 2,
+      "screen_width": 600,
+      "screen_height": 150,
+      "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
+      "centering_position": [0.3, 0.5],
+      "collision_reward": -2,
+      "CVAE_path": "/models/CVAE/Environment_model_00.pth.tar"
+    }
+}

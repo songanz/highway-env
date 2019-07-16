@@ -20,6 +20,13 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         if not config:
             super(HighwayEnvCon_imagine, self).__init__()
         else:
+            try:
+                self.CVAE_path = os.path.abspath(os.getcwd()+config.pop('CVAE_path'))
+            except KeyError:
+                cwd = os.getcwd()
+                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+                filename = 'Environment_model' + '_00.pth.tar'
+                self.CVAE_path = os.path.join(CVAEdir, filename)
             super(HighwayEnvCon_imagine, self).__init__(config)
         state_size = self.observation_space.shape[0]
         action_size = self.action_space.shape[0]
@@ -141,18 +148,13 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         return imagine_next_state, imagine_env_rew, self.env_model.done
 
     def load_CVAE(self):
-        cwd = os.getcwd()  # get father folder of the scripts folder
-        CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
-        filename = self.env_model.name + '_00.pth.tar'
-        pathname = os.path.join(CVAEdir, filename)
-        ckpt = tr.load(pathname)
+        ckpt = tr.load(self.CVAE_path)
         self.env_model.load_state_dict(ckpt['state_dict'])
         self.env_model.opt.load_state_dict(ckpt['optimizer'])
 
     # todo check imagination path by visualization
     def check_im(self, im):
         ori_obs = im[0]
-        # x = np.array([im[i]['x'][:] for i in range(len(im))])
         # Use absolute x position for better visulization
         x = np.array([im[i]['x'][:] + i/self.POLICY_FREQUENCY*im[i]['vx'][0] for i in range(len(im))])
         y = np.array([im[i]['y'][:] for i in range(len(im))])

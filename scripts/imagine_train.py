@@ -19,7 +19,7 @@ DEFAULT_ARGUMENTS = [
     "--activation=tf.tanh",
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
-    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/Aggressive.json",
+    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/im_Aggressive.json",
 
     # last save name must be 'latest', otherwise check the trpo_mpi file
     "--save_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/Imagine/latest",

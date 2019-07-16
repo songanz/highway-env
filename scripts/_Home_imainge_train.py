@@ -20,7 +20,7 @@ DEFAULT_ARGUMENTS = [
     "--activation=tf.tanh",
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
-    "--env_json=/home/songanz/Documents/Git_repo/highway-env/scripts/config/Aggressive.json",
+    "--env_json=/home/songanz/Documents/Git_repo/highway-env/scripts/config/im_Aggressive.json",
     # last save name must be 'latest'
     "--save_path=/home/songanz/Documents/Git_repo/highway-env/models/Imagine/latest",
     "--load_path=/home/songanz/Documents/Git_repo/highway-env/models/latest",
