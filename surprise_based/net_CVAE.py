@@ -205,7 +205,7 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
 
         recon_next_state, mean, log_var = self.forward(x, c, device)
         loss, _, KL_D = self.loss_fun(mean, log_var, x, tr.squeeze(recon_next_state))
-        loss_for_bonus_rew = loss.data.numpy()*100
+        loss_for_bonus_rew = loss.data.numpy()*10
 
         eta = self.eta/max((1, np.mean(loss_for_bonus_rew)))
 

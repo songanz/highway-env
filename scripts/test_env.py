@@ -1,9 +1,7 @@
 import highway_env
 import gym
 
-
 env = gym.make("highway-continuous-v0")
-# env = gym.make("highway-v0")
 
 done = False
 while not done:

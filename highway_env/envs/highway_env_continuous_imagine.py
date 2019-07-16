@@ -2,6 +2,8 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 from gym import spaces
 import os
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 from highway_env import utils
 from highway_env.envs.highway_env_continuous import HighwayEnvCon
@@ -38,6 +40,8 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         self.im_old_ob = self.observation.observe()
         self.vpred_im_mc = 0
         self.im_path_num = 0
+        # todo delete debug plot
+        self.im = []
 
     def step(self, action, fear=False):
         gamma = 0.99
@@ -46,6 +50,9 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                 if self.im_counter == 0:
                     self.im_old_ob = self.observation.observe()
                     self.vpred_im_mc = 0
+                    # todo delete debug plot
+                    self.im = [self.observation.reverse_normalize(self.im_old_ob)]
+
                 if self.env_model.done or self.im_counter > 8:
                     self.env_model.done = False
                     self.im_counter = 0
@@ -60,6 +67,10 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
 
                 self.im_counter += 1
                 self.im_old_ob = np.squeeze(ob_next_im)
+
+                # todo delete debug plot
+                self.im.append(self.observation.reverse_normalize(self.im_old_ob))
+                self.check_im(self.im)
 
                 return ob_next_im, rew_im, new_im, info
 
@@ -132,11 +143,46 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
     def load_CVAE(self):
         cwd = os.getcwd()  # get father folder of the scripts folder
         CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
-        filename = self.env_model.name + '.pth.tar'
+        filename = self.env_model.name + '_00.pth.tar'
         pathname = os.path.join(CVAEdir, filename)
         ckpt = tr.load(pathname)
         self.env_model.load_state_dict(ckpt['state_dict'])
         self.env_model.opt.load_state_dict(ckpt['optimizer'])
 
     # todo check imagination path by visualization
-    # def check_im(self, ob, is_im=True):
+    def check_im(self, im):
+        ori_obs = im[0]
+        # x = np.array([im[i]['x'][:] for i in range(len(im))])
+        # Use absolute x position for better visulization
+        x = np.array([im[i]['x'][:] + i/self.POLICY_FREQUENCY*im[i]['vx'][0] for i in range(len(im))])
+        y = np.array([im[i]['y'][:] for i in range(len(im))])
+        numCar = ori_obs.shape[0]
+        l = self.vehicle.LENGTH
+        w = self.vehicle.WIDTH
+        lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
+        lane_width = self.road.network.get_lane(lane_index).width
+        lane_num = len(self.road.network.lanes_list())
+        st = 0 - lane_width/2
+
+        plt.cla()  # clear current axis
+        ax = plt.gca()
+        ax.set_xlim(-100, 100)
+        ax.set_ylim(-2.3, 12.3)
+        ax.set_aspect('equal')
+
+        # plot lane boundary
+        plt.plot([-100, 100], [st, st], "-k")  # black: lane boundary
+        for j in range(1, lane_num+1):
+            plt.plot([-100, 100], [st+j*lane_width, st+j*lane_width], "-k")
+
+        for i in range(numCar):
+            if i == 0:
+                car = mpatches.Rectangle((ori_obs['x'][i] - l/2, ori_obs['y'][i] - w/2), l, w)
+                car.set_fill(True)
+            else:
+                car = mpatches.Rectangle((ori_obs['x'][i] - l/2, ori_obs['y'][i] - w/2), l, w)
+                car.set_fill(False)
+            ax.add_patch(car)
+            plt.plot(x[:,i], y[:,i])
+        plt.grid(False)
+        plt.pause(0.001)

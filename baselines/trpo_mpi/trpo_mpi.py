@@ -148,7 +148,7 @@ def learn(*,
         network,
         env,
         total_timesteps,
-        timesteps_per_batch=128,  # what to train on
+        timesteps_per_batch=256,  # what to train on
         max_kl=0.001,
         cg_iters=10,
         gamma=0.99,
