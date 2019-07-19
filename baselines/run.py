@@ -8,6 +8,8 @@ from collections import defaultdict
 import tensorflow as tf
 import numpy as np
 import json
+from collections import deque
+import scipy.io as sio
 
 from baselines.common.vec_env import VecFrameStack, VecNormalize, VecEnv
 from baselines.common.vec_env.vec_video_recorder import VecVideoRecorder
@@ -292,6 +294,17 @@ def animation(args):
     load_path = extra_args['load_path']
     extra_args.pop('load_path', None)
 
+    try:
+        save_path = extra_args['save_eval_path']
+        extra_args.pop('save_eval_path')
+    except KeyError:
+        cwd = os.getcwd()
+        evaldir = os.path.abspath(cwd + '/models/evaluation/')
+        filename = 'evalHist'
+        save_path = os.path.join(evaldir, filename)
+
+    ave_env_rewbuffer = deque(maxlen=40)
+
     alg_kwargs.update(extra_args)
 
     env = build_env(args)
@@ -316,15 +329,15 @@ def animation(args):
     U.initialize()
     # model.load_variables(load_path)
     model.load(load_path)
+    mean_reward = []
 
     if args.play:
         logger.log("Running trained model")
         obs = env.reset()
-
         state = model.initial_state if hasattr(model, 'initial_state') else None
         dones = np.zeros((1,))
-
         episode_rew = 0
+        lenth = 0
         while True:
             if state is not None:
                 actions, _, state, _ = model.step(obs,S=state, M=dones)
@@ -334,15 +347,20 @@ def animation(args):
             obs, rew, done, _ = env.step(actions)
             # print(rew)
             episode_rew += rew[0] if isinstance(env, VecEnv) else rew
-            env.render()
+            lenth += 1
+            env.render()  # whether show animation
             done = done.any() if isinstance(done, np.ndarray) else done
             if done:
                 print('episode_rew={}'.format(episode_rew))
+                ave_env_rewbuffer.append(episode_rew/lenth)
+                mean_reward.append(np.mean(ave_env_rewbuffer))
+                sio.savemat(save_path,
+                            {'mean_reward': mean_reward})
                 episode_rew = 0
+                lenth = 0
                 obs = env.reset()
 
     env.close()
-
 
 
 if __name__ == '__main__':

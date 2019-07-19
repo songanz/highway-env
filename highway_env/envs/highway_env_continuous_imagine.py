@@ -52,7 +52,7 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
 
     def step(self, action, fear=False):
         gamma = 0.99
-        while self.im_path_num < 3:
+        while self.im_path_num < 5:
             while self.imagine:
                 if self.im_counter == 0:
                     self.im_old_ob = self.observation.observe()
@@ -60,7 +60,7 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                     # todo delete debug plot
                     self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
-                if self.env_model.done or self.im_counter > 8:
+                if self.env_model.done or self.im_counter > 16:
                     self.env_model.done = False
                     self.im_counter = 0
                     self.im_path_num += 1
@@ -76,8 +76,8 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                 self.im_old_ob = np.squeeze(ob_next_im)
 
                 # todo delete debug plot
-                self.im.append(self.observation.reverse_normalize(self.im_old_ob))
-                self.check_im(self.im)
+                # self.im.append(self.observation.reverse_normalize(self.im_old_ob))
+                # self.check_im(self.im)
 
                 return ob_next_im, rew_im, new_im, info
 
@@ -89,7 +89,7 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         if terminal:
             self.terminal_num += 1
 
-        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 32:
+        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 10000:
             self.update_env_model()
             self.terminal_num += 1
         # calculate intrinsic reward

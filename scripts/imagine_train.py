@@ -23,7 +23,7 @@ DEFAULT_ARGUMENTS = [
 
     # last save name must be 'latest', otherwise check the trpo_mpi file
     "--save_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/Imagine/latest",
-    "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
+    # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
     "--save_video_interval=0",
     "--play"
 ]

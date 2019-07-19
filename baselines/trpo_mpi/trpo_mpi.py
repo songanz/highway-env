@@ -24,11 +24,11 @@ def traj_segment_generator(pi, env, horizon, stochastic):
     # Initialize state variables
     t = 0
     ac = env.action_space.sample()
-    prevac = ac.copy()
+    prevac = deepcopy(ac)
     new = True
     rew = 0.0
     ob = env.reset()
-    ob_im = ob.copy()
+    ob_im = deepcopy(ob)
     info = {'r_e': 0, "r_i": 0}
     info_temp = {'r_e': 0, 'r_i': 0}
     vpred = 0
@@ -80,6 +80,7 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             ep_lens = []
             ep_env_rets = []
             ep_int_rets = []
+            t = 0
         i = t % horizon
         obs[i] = ob
         vpreds[i] = np.mean(vpred_im_mc)
@@ -148,7 +149,7 @@ def learn(*,
         network,
         env,
         total_timesteps,
-        timesteps_per_batch=256,  # what to train on
+        timesteps_per_batch=1024,  # what to train on
         max_kl=0.001,
         cg_iters=10,
         gamma=0.99,
