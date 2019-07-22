@@ -22,7 +22,7 @@ DEFAULT_ARGUMENTS = [
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/IDM.json",
     "--save_eval_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/evaluation/evalHist_IDM2IDM",
-    "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
+    "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/baseline_con_00/latest",
     "--save_video_interval=0",
     "--play"
 ]

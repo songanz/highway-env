@@ -8,21 +8,32 @@ import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 DEFAULT_ARGUMENTS = [
-    "--env=highway-v0",
+    # "--env=highway-v0",
+    # "--env=highway-continuous-v0",
     # "--env=highway-continuous-intrinsic-rew-v0",
     # "--env=highway-continuous-imagine-v0",
+    # "--env=highway-discrete-v0",
+    # "--env=highway-discrete-intrinsic-rew-v0",
+    "--env=highway-discrete-imagine-v0",
+
+
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
     # "--num_timesteps=1e3",  # testing
 
-    # policy net parameter
+
     "--network=mlp",
     "--num_layers=3",
     "--num_hidden=124",
     "--activation=tf.tanh",
 
+
     "--num_env=0",  # >1 for mpi, disabled for online learning
     # "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/IDM.json",
+    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/im_IDM.json",  # for imagination
+
+
+    "--save_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/debug/latest",
     # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/Surprise/latest",
     # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
     "--save_video_interval=0",

@@ -330,6 +330,7 @@ def animation(args):
     # model.load_variables(load_path)
     model.load(load_path)
     mean_reward = []
+    crash = 0
 
     if args.play:
         logger.log("Running trained model")
@@ -345,20 +346,25 @@ def animation(args):
                 actions, _, _, _ = model.step(obs)
 
             obs, rew, done, _ = env.step(actions)
+            if done[0] and rew < -200:
+                crash += 1
             # print(rew)
             episode_rew += rew[0] if isinstance(env, VecEnv) else rew
             lenth += 1
-            env.render()  # whether show animation
+            # env.render()  # whether show animation
             done = done.any() if isinstance(done, np.ndarray) else done
             if done:
                 print('episode_rew={}'.format(episode_rew))
                 ave_env_rewbuffer.append(episode_rew/lenth)
                 mean_reward.append(np.mean(ave_env_rewbuffer))
                 sio.savemat(save_path,
-                            {'mean_reward': mean_reward})
+                            {'mean_reward': mean_reward,
+                             'crash_num': crash})
                 episode_rew = 0
                 lenth = 0
                 obs = env.reset()
+            if len(mean_reward) == 500:
+                break
 
     env.close()
 

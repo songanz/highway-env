@@ -217,7 +217,11 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         self.decoder.train()
 
         x = Variable(tr.from_numpy(next_state_).to(device), requires_grad=False).float()
-        c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
+        try:
+            c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
+        except ValueError:
+            c = Variable(tr.from_numpy(np.hstack((state_, ego_action_[:,np.newaxis]))).to(device), requires_grad=False).float()
+
 
         recon_next_state, mean, log_var = self.forward(x, c, device)
 

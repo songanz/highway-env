@@ -21,6 +21,21 @@ register(
 )
 
 register(
+    id='highway-discrete-v0',
+    entry_point='highway_env.envs:HighwayEnvDis',
+)
+
+register(
+    id='highway-discrete-intrinsic-rew-v0',
+    entry_point='highway_env.envs:HighwayEnvDis_intrinsic_rew',
+)
+
+register(
+    id='highway-discrete-imagine-v0',
+    entry_point='highway_env.envs:HighwayEnvDis_imagine',
+)
+
+register(
     id='merge-v0',
     entry_point='highway_env.envs:MergeEnv',
 )
