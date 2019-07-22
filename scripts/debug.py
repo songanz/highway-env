@@ -3,9 +3,17 @@ import baselines.run as run
 import highway_env  # don't remove, for registration the new game
 import sys
 
-# f = open("../models/test.out", 'w')
-# sys.stdout = f
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
+
+cwd = os.getcwd()
+env_json_path = os.path.abspath(cwd + '/scripts/config/im_IDM.json')
+# env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
+save_path = os.path.abspath(cwd + '/models/debug/latest')
+load_path = os.path.abspath(cwd + '/models/Surprise/latest')
+
+# f = open(cwd + "/models/test.out", 'w')
+# sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
     # "--env=highway-v0",
@@ -19,7 +27,6 @@ DEFAULT_ARGUMENTS = [
 
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
-    # "--num_timesteps=1e3",  # testing
 
 
     "--network=mlp",
@@ -29,13 +36,10 @@ DEFAULT_ARGUMENTS = [
 
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
-    # "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/IDM.json",
-    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/im_IDM.json",  # for imagination
+    "--env_json=" + env_json_path,
 
 
-    "--save_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/debug/latest",
-    # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/Surprise/latest",
-    # "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/latest",
+    "--save_path=" + save_path,
     "--save_video_interval=0",
     "--play"
 ]

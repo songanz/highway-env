@@ -3,15 +3,21 @@ import baselines.run as run
 import highway_env  # don't remove, for registration the new game
 import sys
 
-# f = open("../models/test.out", 'w')
-# sys.stdout = f
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
+
+cwd = os.getcwd()
+env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
+save_eval_path = os.path.abspath(cwd + '/models/evaluation/evalHist_IDM2IDM')
+load_path = os.path.abspath(cwd + '/models/baseline_con_00/latest')
+
+# f = open(cwd + "/models/test.out", 'w')
+# sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
     "--env=highway-continuous-v0",  # if use other env. the CVAE model will update!!!
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
-    # "--num_timesteps=1e3",  # testing
 
     # policy net parameter
     "--network=mlp",
@@ -20,9 +26,9 @@ DEFAULT_ARGUMENTS = [
     "--activation=tf.tanh",
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
-    "--env_json=C:/Users/szhan117/Documents/git_repo/highway-env/scripts/config/IDM.json",
-    "--save_eval_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/evaluation/evalHist_IDM2IDM",
-    "--load_path=C:/Users/szhan117/Documents/git_repo/highway-env/models/baseline_con_00/latest",
+    "--env_json=" + env_json_path,
+    "--save_eval_path=" + save_eval_path,
+    "--load_path=" + load_path,
     "--save_video_interval=0",
     "--play"
 ]
