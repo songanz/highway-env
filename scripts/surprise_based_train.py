@@ -15,10 +15,9 @@ load_path = os.path.abspath(cwd + '/models/baseline/latest')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--env=highway-continuous-intrinsic-rew-v0",
+    "--env=highway-discrete-intrinsic-rew-v0",
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
-    # "--num_timesteps=1e3",  # testing
 
     # policy net parameter
     "--network=mlp",

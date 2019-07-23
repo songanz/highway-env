@@ -466,6 +466,7 @@ def learn(*,
         logger.record_tabular("EpisodesSoFar", episodes_so_far)
         logger.record_tabular("TimestepsSoFar", timesteps_so_far)
         logger.record_tabular("TimeElapsed", time.time() - tstart)
+        logger.record_tabular("MaxIntrinsicRew", np.max(seg["rew_int"]))
 
         trainHist = osp.expanduser(save_path[:-6]+'trainHist')
         sio.savemat(trainHist,

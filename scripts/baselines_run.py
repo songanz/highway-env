@@ -15,7 +15,7 @@ load_path = os.path.abspath(cwd + '/models/baseline/latest')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--env=highway-continuous-v0",
+    "--env=highway-discrete-v0",
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
 
