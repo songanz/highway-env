@@ -95,8 +95,11 @@ def traj_segment_generator(pi, env, horizon, stochastic):
             _ = info_temp['imagine']
             ob_im = ob_temp
             new_im = new_temp
-            if new_im:
+            if new_im and rew_temp < -200:
                 vpred_im_mc.append(info_temp['vpred_im_mc'])
+            elif new_im and rew_temp > -200:
+                _, vp, _, _ = pi.step(ob_im, stochastic=stochastic)
+                vpred_im_mc.append(info_temp['vpred_im_mc'] + vp)
             continue
 
         except KeyError:

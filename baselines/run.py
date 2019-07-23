@@ -346,7 +346,7 @@ def animation(args):
                 actions, _, _, _ = model.step(obs)
 
             obs, rew, done, _ = env.step(actions)
-            if done[0] and rew < -200:
+            if done[0] and rew < -200:  # for crash termination
                 crash += 1
             # print(rew)
             episode_rew += rew[0] if isinstance(env, VecEnv) else rew

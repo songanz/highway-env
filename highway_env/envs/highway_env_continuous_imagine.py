@@ -47,12 +47,14 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         self.im_old_ob = self.observation.observe()
         self.vpred_im_mc = 0
         self.im_path_num = 0
+        self.im_length = 16
+        self.im_ep = 5
         # todo delete debug plot
         self.im = []
 
     def step(self, action, fear=False):
         gamma = 0.99
-        while self.im_path_num < 5:
+        while self.im_path_num < self.im_ep:
             while self.imagine:
                 if self.im_counter == 0:
                     self.im_old_ob = self.observation.observe()
@@ -60,13 +62,15 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                     # todo delete debug plot
                     self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
-                if self.env_model.done or self.im_counter > 16:
+                if self.env_model.done or self.im_counter > self.im_length:
                     self.env_model.done = False
                     self.im_counter = 0
                     self.im_path_num += 1
                     break
 
                 ob_next_im, rew_im, new_im= self.imagine_(action, self.im_old_ob)
+                if self.im_counter >= self.im_length:
+                    new_im = True
 
                 self.vpred_im_mc += np.power(gamma, self.im_counter)*rew_im
 
@@ -89,7 +93,7 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
         if terminal:
             self.terminal_num += 1
 
-        if self.terminal_num % 200 == 1 and len(self.Buf.memory) > 10000:
+        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 10000:
             self.update_env_model()
             self.terminal_num += 1
 
