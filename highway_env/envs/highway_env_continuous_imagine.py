@@ -131,7 +131,7 @@ class HighwayEnvCon_imagine(HighwayEnvCon):
                           % (loss, MSE, KLD))
                     print('Memory: %8.2d' % len(self.Buf.memory))
         cwd = os.getcwd()  # get father folder of the scripts folder
-        CVAEdir = os.path.abspath(cwd + '/models/Imagine/')
+        CVAEdir = os.path.abspath(cwd + '/models/Imagine_con/')
         filename = self.env_model.name + '.pth.tar'
         pathname = os.path.join(CVAEdir, filename)
         tr.save({
