@@ -8,8 +8,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/im_Aggressive.json')
-save_path = os.path.abspath(cwd + '/models/Imagine/latest')
-load_path = os.path.abspath(cwd + '/models/baseline/latest')
+save_path = os.path.abspath(cwd + '/models/Imagine_con/latest')
+load_path = os.path.abspath(cwd + '/models/baseline_con_00/latest')
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
@@ -30,7 +30,7 @@ DEFAULT_ARGUMENTS = [
 
     # last save name must be 'latest', otherwise check the trpo_mpi file
     "--save_path=" + save_path,
-    # "--load_path=" + load_path,
+    "--load_path=" + load_path,
     "--save_video_interval=0",
     "--play"
 ]
