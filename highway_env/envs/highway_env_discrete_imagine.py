@@ -51,12 +51,14 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
         self.im_old_ob = self.observation.observe()
         self.vpred_im_mc = 0
         self.im_path_num = 0
+        self.im_length = 16
+        self.im_ep = 5
         # todo delete debug plot
         self.im = []
 
     def step(self, action, fear=False):
         gamma = 0.99
-        while self.im_path_num < 5:
+        while self.im_path_num < self.im_ep:
             while self.imagine:
                 if self.im_counter == 0:
                     self.im_old_ob = self.observation.observe()
@@ -64,26 +66,31 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
                     # todo delete debug plot
                     self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
-                if self.env_model.done or self.im_counter > 16:
+                if self.env_model.done or self.im_counter > self.im_length:
                     self.env_model.done = False
                     self.im_counter = 0
                     self.im_path_num += 1
                     break
 
-                ob_next_im, rew_im, new_im= self.imagine_(action, self.im_old_ob)
+                ob_next_im, rew_im, _= self.imagine_(action, self.im_old_ob)
 
                 self.vpred_im_mc += np.power(gamma, self.im_counter)*rew_im
 
-                info = {'imagine': self.im_counter, 'vpred_im_mc': self.vpred_im_mc}
-
                 self.im_counter += 1
                 self.im_old_ob = np.squeeze(ob_next_im)
+
+                if self.im_counter > self.im_length:
+                    self.env_model.done = True
+
+                info = {'imagine': self.im_counter,
+                        'vpred_im_mc': self.vpred_im_mc,
+                        'imagine_done': self.env_model.done}
 
                 # todo delete debug plot
                 # self.im.append(self.observation.reverse_normalize(self.im_old_ob))
                 # self.check_im(self.im)
 
-                return ob_next_im, rew_im, new_im, info
+                return ob_next_im, rew_im, False, info
 
         self.im_path_num = 0
         old_s = self.observation.observe()
@@ -93,7 +100,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
         if terminal:
             self.terminal_num += 1
 
-        if self.terminal_num % 200 == 1 and len(self.Buf.memory) > 10000:
+        if self.terminal_num % 20 == 1 and len(self.Buf.memory) > 256:
             self.update_env_model()
             self.terminal_num += 1
 

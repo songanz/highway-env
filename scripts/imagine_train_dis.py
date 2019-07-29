@@ -7,39 +7,30 @@ import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
-# env_json_path = os.path.abspath(cwd + '/scripts/config/im_IDM.json')
-env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
-save_path = os.path.abspath(cwd + '/models/debug/latest')
-# load_path = os.path.abspath(cwd + '/models/Surprise/latest')
+env_json_path = os.path.abspath(cwd + '/scripts/config/im_Aggressive.json')
+save_path = os.path.abspath(cwd + '/models/Imagine_dis/latest')
+load_path = os.path.abspath(cwd + '/models/baseline_dis_00/latest')
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    # "--env=highway-v0",
-    "--env=highway-continuous-v0",
-    # "--env=highway-continuous-intrinsic-rew-v0",
-    # "--env=highway-continuous-imagine-v0",
-    # "--env=highway-discrete-v0",
-    # "--env=highway-discrete-intrinsic-rew-v0",
-    # "--env=highway-discrete-imagine-v0",
-
-
+    "--env=highway-discrete-imagine-v0",
     "--alg=trpo_mpi",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
 
-
+    # policy net parameter
     "--network=mlp",
     "--num_layers=3",
     "--num_hidden=124",
     "--activation=tf.tanh",
 
-
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--env_json=" + env_json_path,
 
-
+    # last save name must be 'latest', otherwise check the trpo_mpi file
     "--save_path=" + save_path,
+    "--load_path=" + load_path,
     "--save_video_interval=0",
     "--play"
 ]
