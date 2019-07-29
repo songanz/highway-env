@@ -7,9 +7,9 @@ import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
-env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
-save_path = os.path.abspath(cwd + '/models/Surprise/latest')
-load_path = os.path.abspath(cwd + '/models/baseline/latest')
+env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
+save_path = os.path.abspath(cwd + '/models/Surprise_dis_aggressive/latest')
+# load_path = os.path.abspath(cwd + '/models/baseline/latest')
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
