@@ -6,7 +6,7 @@
                   "FEATURES": ["x", "y", "vx", "vy"],
                   "vehicles_count": 7
               },
-      "initial_spacing": 2,
+      "initial_spacing": 1,
       "screen_width": 600,
       "screen_height": 150,
       "other_vehicles_type": "highway_env.vehicle.behavior.DefensiveVehicle",

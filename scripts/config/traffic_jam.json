@@ -9,7 +9,7 @@
       "initial_spacing": 0.3,
       "screen_width": 600,
       "screen_height": 150,
-      "other_vehicles_type": "highway_env.vehicle.behavior.AggressiveVehicle",
+      "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
       "centering_position": [0.3, 0.5],
       "collision_reward": -2
     }

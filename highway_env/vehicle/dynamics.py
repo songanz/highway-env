@@ -63,26 +63,38 @@ class Vehicle(Loggable):
         :param spacing: ratio of spacing to the front vehicle, 1 being the default
         :return: A vehicle with random position and/or velocity
         """
-        if velocity is None:
+        if velocity is None and spacing >= 1:
             velocity = road.np_random.uniform(Vehicle.DEFAULT_VELOCITIES[0], Vehicle.DEFAULT_VELOCITIES[1])
-        default_spacing = 1.5*velocity
-        _from = road.np_random.choice(list(road.network.graph.keys()))
-        _to = road.np_random.choice(list(road.network.graph[_from].keys()))
-        _id = road.np_random.choice(len(road.network.graph[_from][_to]))
-        offset = spacing * default_spacing * np.exp(-5 / 30 * len(road.network.graph[_from][_to]))
-        i = np.random.choice([0, 1])
-        if i:
-            x0 = np.max([v.position[0] for v in road.vehicles]) if len(road.vehicles) else 3*offset
-            x0 += offset * road.np_random.uniform(0.9, 1.1)
-
+            default_spacing = 1.5 * velocity
+        elif velocity is None and spacing < 1:
+            velocity = road.np_random.uniform(Vehicle.DEFAULT_VELOCITIES[0], Vehicle.DEFAULT_VELOCITIES[1])
+            default_spacing = 1.5 * velocity
+            velocity *= spacing
         else:
-            x0 = np.min([v.position[0] for v in road.vehicles]) if len(road.vehicles) else 3*offset
-            x0 -= offset * road.np_random.uniform(0.9, 1.1)
+            default_spacing = 1.5 * velocity
+        while True:
+            _from = road.np_random.choice(list(road.network.graph.keys()))
+            _to = road.np_random.choice(list(road.network.graph[_from].keys()))
+            _id = road.np_random.choice(len(road.network.graph[_from][_to]))
+            offset = spacing * default_spacing * np.exp(-5 / 30 * len(road.network.graph[_from][_to]))
+            i = np.random.choice([0, 1])
+            if i:
+                x0 = np.max([v.position[0] for v in road.vehicles]) if len(road.vehicles) else 3*offset
+                x0 += offset * road.np_random.uniform(0.9, 1.1)
 
-        # x0 += offset * road.np_random.uniform(0.9, 1.1)
-        # x0 += np.random.choice([-1, 1]) *offset * road.np_random.uniform(0.9, 1.1)
-        v = cls(road, road.network.get_lane((_from, _to, _id)).position(x0, 0), 0, velocity)
-        return v
+            else:
+                x0 = np.min([v.position[0] for v in road.vehicles]) if len(road.vehicles) else 3*offset
+                x0 -= offset * road.np_random.uniform(0.9, 1.1)
+
+            # x0 += offset * road.np_random.uniform(0.9, 1.1)
+            # x0 += np.random.choice([-1, 1]) *offset * road.np_random.uniform(0.9, 1.1)
+            v = cls(road, road.network.get_lane((_from, _to, _id)).position(x0, 0), 0, velocity)
+            for other in road.vehicles:
+                v.check_collision(other)
+                if v.crashed:
+                    break
+            else:
+                return v
 
     @classmethod
     def create_from(cls, vehicle):

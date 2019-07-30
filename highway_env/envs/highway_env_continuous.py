@@ -135,7 +135,7 @@ class HighwayEnvCon(AbstractEnv):
         """
             Create some new random vehicles of a given type, and add them on the road.
         """
-        self.vehicle = Vehicle.create_random(self.road, 25, spacing=self.config["initial_spacing"])
+        self.vehicle = Vehicle.create_random(self.road, spacing=self.config["initial_spacing"])
         self.road.vehicles.append(self.vehicle)
 
         vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])  # IDM from the config: can change
