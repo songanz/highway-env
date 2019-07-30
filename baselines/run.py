@@ -351,7 +351,7 @@ def animation(args):
             # print(rew)
             episode_rew += rew[0] if isinstance(env, VecEnv) else rew
             lenth += 1
-            # env.render()  # whether show animation
+            env.render()  # whether show animation
             done = done.any() if isinstance(done, np.ndarray) else done
             if done:
                 print('episode_rew={}'.format(episode_rew))
