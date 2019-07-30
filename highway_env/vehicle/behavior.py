@@ -10,7 +10,7 @@ class IDMVehicle(ControlledVehicle):
 
         - Longitudinal: the IDM model computes an acceleration given the preceding vehicle's distance and velocity.
         - Lateral: the MOBIL model decides when to change lane by maximizing the acceleration of nearby vehicles.
-        """
+    """
 
     # Longitudinal policy parameters
     ACC_MAX = 6.0  # [m/s2]
