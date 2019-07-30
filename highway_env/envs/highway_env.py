@@ -86,7 +86,7 @@ class HighwayEnv(AbstractEnv):
 
         vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])
         for _ in range(self.config["vehicles_count"]):
-            self.road.vehicles.append(vehicles_type.create_random(self.road))
+            self.road.vehicles.append(vehicles_type.create_random(self.road, spacing=self.config["initial_spacing"]))
 
     def _reward(self, action):
         """
