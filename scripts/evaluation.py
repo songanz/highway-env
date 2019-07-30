@@ -7,8 +7,8 @@ import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
-env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
-save_eval_path = os.path.abspath(cwd + '/models/evaluation/evalHist_dis_IDM2IDM')
+env_json_path = os.path.abspath(cwd + '/scripts/config/Defensive.json')
+save_eval_path = os.path.abspath(cwd + '/models/evaluation/evalHist_dis_IDM2Defensive')
 load_path = os.path.abspath(cwd + '/models/baseline_dis_00/latest')
 
 # f = open(cwd + "/models/test.out", 'w')
