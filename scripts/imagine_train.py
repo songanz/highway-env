@@ -39,6 +39,9 @@ if __name__ == "__main__":
     args = sys.argv
     if len(args) <= 1:
         args = DEFAULT_ARGUMENTS
+    else:
+        DEFAULT_ARGUMENTS.extend(args)
+        args = DEFAULT_ARGUMENTS
     run.main(args)  # for training
     # run.animation(args)  # for animation
     # f.close()

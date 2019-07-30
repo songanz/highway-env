@@ -8,7 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Defensive.json')
-save_eval_path = os.path.abspath(cwd + '/models/evaluation/evalHist_Surprise_dis_IDM2Defensive')
+save_eval_path = os.path.abspath(cwd + '/models/evaluation/evalHist_Surprise_dis_IDM2temp')
 load_path = os.path.abspath(cwd + '/models/Surprise_dis_00/latest')
 
 # f = open(cwd + "/models/test.out", 'w')
@@ -37,6 +37,9 @@ DEFAULT_ARGUMENTS = [
 if __name__ == "__main__":
     args = sys.argv
     if len(args) <= 1:
+        args = DEFAULT_ARGUMENTS
+    else:
+        DEFAULT_ARGUMENTS.extend(args)
         args = DEFAULT_ARGUMENTS
     # run.main(args)  # for training
     run.animation(args)  # for animation
