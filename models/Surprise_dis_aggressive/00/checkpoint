@@ -1,2 +1,2 @@
-model_checkpoint_path: "/s/szhan117/highway-env/models/Surprise_dis_aggressive/latest"
-all_model_checkpoint_paths: "/s/szhan117/highway-env/models/Surprise_dis_aggressive/latest"
+model_checkpoint_path: "/home/songanz/Documents/Git_repo/highway-env/models/Surprise_dis_aggressive/00/latest"
+all_model_checkpoint_paths: "/home/songanz/Documents/Git_repo/highway-env/models/Surprise_dis_aggressive/00/latest"
