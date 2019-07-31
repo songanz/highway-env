@@ -473,10 +473,10 @@ def learn(*,
         logger.record_tabular("TimeElapsed", time.time() - tstart)
         logger.record_tabular("MaxIntrinsicRew", np.max(seg["rew_int"]))
 
-        trainHist = osp.expanduser(save_path+'TrainHist')
-        sio.savemat(trainHist,
-                    {'mean_reward': mean_reward,
-                     'intrinsic_reward': intrinsic_reward})
+        # trainHist = osp.expanduser(save_path+'TrainHist')
+        # sio.savemat(trainHist,
+        #             {'mean_reward': mean_reward,
+        #              'intrinsic_reward': intrinsic_reward})
 
         if rank==0:
             logger.dump_tabular()
