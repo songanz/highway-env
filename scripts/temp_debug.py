@@ -17,11 +17,11 @@ save_path = os.path.abspath(cwd + '/models/debug/latest')
 
 DEFAULT_ARGUMENTS = [
     # "--env=highway-v0",
-    "--env=highway-continuous-v0",
+    # "--env=highway-continuous-v0",
     # "--env=highway-continuous-intrinsic-rew-v0",
     # "--env=highway-continuous-imagine-v0",
     # "--env=highway-discrete-v0",
-    # "--env=highway-discrete-intrinsic-rew-v0",
+    "--env=highway-discrete-intrinsic-rew-v0",
     # "--env=highway-discrete-imagine-v0",
 
 
@@ -38,7 +38,6 @@ DEFAULT_ARGUMENTS = [
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--env_json=" + env_json_path,
 
-
     "--save_path=" + save_path,
     "--save_video_interval=0",
     "--play"
@@ -48,6 +47,11 @@ if __name__ == "__main__":
     args = sys.argv
     if len(args) <= 1:
         args = DEFAULT_ARGUMENTS
+
+    if not [s for s in args if "--log_path=" in s]:
+        log_path = [s for s in args if "--save_path=" in s][0][12:]
+        args.append("--log_path=" + log_path + "_log")
+
     run.main(args)  # for training
     # run.animation(args)  # for animation
     # f.close()
