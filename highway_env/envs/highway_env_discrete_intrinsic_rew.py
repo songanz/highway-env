@@ -15,6 +15,8 @@ class HighwayEnvDis_intrinsic_rew(HighwayEnvDis):
     def __init__(self, config=None):  # create CVAE model
         self.device = 'cpu'
         self.terminal_num = 0
+        self.other_vehicles_type = config['other_vehicles_type'].split('.')[-1]
+        self.spacing = str(config['initial_spacing'])
         if not config:
             super(HighwayEnvDis_intrinsic_rew, self).__init__()
         else:
@@ -26,7 +28,7 @@ class HighwayEnvDis_intrinsic_rew(HighwayEnvDis):
             action_size = 1
         latent_size = (self.observation.vehicles_count-1)*action_size
         condi_size = state_size + action_size
-        self.env_model = CVAE(name='Environment_model_discrete',
+        self.env_model = CVAE(name='Environment_model_' + self.other_vehicles_type + self.spacing + '_discrete',
                               state_size=state_size,
                               action_size=action_size,
                               latent_size=latent_size,
