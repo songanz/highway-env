@@ -11,7 +11,7 @@ cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 save_eval_path = os.path.abspath(cwd + '/models/evaluation/temp')
 # last save name must be 'latest', otherwise check the trpo_mpi file
-load_path = os.path.abspath(cwd + '/models/Surprise_dis_aggressive_00/latest')
+load_path = os.path.abspath(cwd + '/models/Surprise_dis_aggressive/latest')
 env = "highway-discrete-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
