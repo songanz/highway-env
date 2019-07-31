@@ -1,1 +1,0 @@
-Logging to C:\Users\szhan117\Documents\git_repo\highway-env\models\baseline_dis_aggressive\latest_log
