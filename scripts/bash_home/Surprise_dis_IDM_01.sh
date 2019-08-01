@@ -1,7 +1,7 @@
 #!/bin/bash
 cd /home/songanz/Documents/Git_repo/highway-env/
 export PYTHONPATH=/home/songanz/Documents/Git_repo/highway-env/
-python3 ./scripts/train_baselines.py \
---env=highway-discrete-v0 \
---save_path=/home/songanz/Documents/Git_repo/highway-env/models/baseline_dis/00/latest \
+python3 ./scripts/train_surprise.py \
+--env=highway-discrete-intrinsic-rew-v0 \
+--save_path=/home/songanz/Documents/Git_repo/highway-env/models/Surprise_dis/01/latest \
 --env_json=/home/songanz/Documents/Git_repo/highway-env/scripts/config/IDM.json
