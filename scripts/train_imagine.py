@@ -11,7 +11,7 @@ cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/im_Aggressive.json')
 # last save name must be 'latest', otherwise check the trpo_mpi file
 save_path = os.path.abspath(cwd + '/models/Imagine_con/latest')
-load_path = os.path.abspath(cwd + '/models/baseline_con_00/latest')
+load_path = os.path.abspath(cwd + '/models/baseline_con/00/latest')
 env = "highway-continuous-imagine-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
