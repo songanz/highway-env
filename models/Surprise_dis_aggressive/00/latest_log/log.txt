@@ -5313,3 +5313,213 @@ Stepsize OK!
 -----------------------------------
 save_state method is deprecated, please use save_variables instead
 ********** Iteration 253 ************
+Expected: 0.017 Actual: 0.016
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.19      |
+| EpIntrinsicRew/step | 0.000965  |
+| EpisodesSoFar       | 1.45e+03  |
+| EpLenMean           | 234       |
+| EpRew/step          | -1.91     |
+| EpThisIter          | 5         |
+| EpTotalRewMean      | -170      |
+| ev_tdlam_before     | -8.34e-07 |
+| MaxIntrinsicRew     | 0.00874   |
+| meankl              | 0.000876  |
+| optimgain           | 0.0164    |
+| surrgain            | 0.0164    |
+| TimeElapsed         | 4.89e+04  |
+| TimestepsSoFar      | 2.6e+05   |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 254 ************
+Expected: 0.012 Actual: 0.012
+Stepsize OK!
+----------------------------------
+| entloss             | 0        |
+| entropy             | 1.19     |
+| EpIntrinsicRew/step | 0.000952 |
+| EpisodesSoFar       | 1.45e+03 |
+| EpLenMean           | 234      |
+| EpRew/step          | -1.97    |
+| EpThisIter          | 4        |
+| EpTotalRewMean      | -184     |
+| ev_tdlam_before     | 5.54e-06 |
+| MaxIntrinsicRew     | 0.00543  |
+| meankl              | 0.000874 |
+| optimgain           | 0.0119   |
+| surrgain            | 0.0119   |
+| TimeElapsed         | 4.92e+04 |
+| TimestepsSoFar      | 2.61e+05 |
+----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 255 ************
+Expected: 0.019 Actual: 0.022
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.2       |
+| EpIntrinsicRew/step | 0.00101   |
+| EpisodesSoFar       | 1.46e+03  |
+| EpLenMean           | 231       |
+| EpRew/step          | -2.59     |
+| EpThisIter          | 5         |
+| EpTotalRewMean      | -183      |
+| ev_tdlam_before     | -0.000382 |
+| MaxIntrinsicRew     | 0.00812   |
+| meankl              | 0.000925  |
+| optimgain           | 0.0217    |
+| surrgain            | 0.0217    |
+| TimeElapsed         | 4.94e+04  |
+| TimestepsSoFar      | 2.62e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 256 ************
+Expected: 0.011 Actual: 0.011
+Stepsize OK!
+----------------------------------
+| entloss             | 0        |
+| entropy             | 1.31     |
+| EpIntrinsicRew/step | 0.00101  |
+| EpisodesSoFar       | 1.46e+03 |
+| EpLenMean           | 230      |
+| EpRew/step          | -2.66    |
+| EpThisIter          | 5        |
+| EpTotalRewMean      | -199     |
+| ev_tdlam_before     | 2.16e-05 |
+| MaxIntrinsicRew     | 0.00926  |
+| meankl              | 0.00091  |
+| optimgain           | 0.0115   |
+| surrgain            | 0.0115   |
+| TimeElapsed         | 4.97e+04 |
+| TimestepsSoFar      | 2.63e+05 |
+----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 257 ************
+Expected: 0.013 Actual: 0.013
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.26      |
+| EpIntrinsicRew/step | 0.000824  |
+| EpisodesSoFar       | 1.47e+03  |
+| EpLenMean           | 230       |
+| EpRew/step          | -2.61     |
+| EpThisIter          | 4         |
+| EpTotalRewMean      | -185      |
+| ev_tdlam_before     | -0.000244 |
+| MaxIntrinsicRew     | 0.00476   |
+| meankl              | 0.000939  |
+| optimgain           | 0.0128    |
+| surrgain            | 0.0128    |
+| TimeElapsed         | 4.99e+04  |
+| TimestepsSoFar      | 2.64e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 258 ************
+Expected: 0.013 Actual: 0.012
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.16      |
+| EpIntrinsicRew/step | 0.000833  |
+| EpisodesSoFar       | 1.47e+03  |
+| EpLenMean           | 230       |
+| EpRew/step          | -2.6      |
+| EpThisIter          | 4         |
+| EpTotalRewMean      | -184      |
+| ev_tdlam_before     | -0.000247 |
+| MaxIntrinsicRew     | 0.00473   |
+| meankl              | 0.000772  |
+| optimgain           | 0.0122    |
+| surrgain            | 0.0122    |
+| TimeElapsed         | 5.02e+04  |
+| TimestepsSoFar      | 2.65e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 259 ************
+Expected: 0.011 Actual: 0.011
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.17      |
+| EpIntrinsicRew/step | 0.000827  |
+| EpisodesSoFar       | 1.48e+03  |
+| EpLenMean           | 230       |
+| EpRew/step          | -2.6      |
+| EpThisIter          | 4         |
+| EpTotalRewMean      | -183      |
+| ev_tdlam_before     | -0.000112 |
+| MaxIntrinsicRew     | 0.00695   |
+| meankl              | 0.000852  |
+| optimgain           | 0.0109    |
+| surrgain            | 0.0109    |
+| TimeElapsed         | 5.04e+04  |
+| TimestepsSoFar      | 2.66e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 260 ************
+Expected: 0.012 Actual: 0.011
+Stepsize OK!
+----------------------------------
+| entloss             | 0        |
+| entropy             | 1.19     |
+| EpIntrinsicRew/step | 0.00062  |
+| EpisodesSoFar       | 1.48e+03 |
+| EpLenMean           | 236      |
+| EpRew/step          | -1.92    |
+| EpThisIter          | 4        |
+| EpTotalRewMean      | -154     |
+| ev_tdlam_before     | -0.00012 |
+| MaxIntrinsicRew     | 0.00647  |
+| meankl              | 0.000893 |
+| optimgain           | 0.0115   |
+| surrgain            | 0.0115   |
+| TimeElapsed         | 5.07e+04 |
+| TimestepsSoFar      | 2.67e+05 |
+----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 261 ************
+Expected: 0.011 Actual: 0.010
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.19      |
+| EpIntrinsicRew/step | 0.000651  |
+| EpisodesSoFar       | 1.48e+03  |
+| EpLenMean           | 234       |
+| EpRew/step          | -1.92     |
+| EpThisIter          | 4         |
+| EpTotalRewMean      | -153      |
+| ev_tdlam_before     | -0.000127 |
+| MaxIntrinsicRew     | 0.00335   |
+| meankl              | 0.000844  |
+| optimgain           | 0.0103    |
+| surrgain            | 0.0103    |
+| TimeElapsed         | 5.1e+04   |
+| TimestepsSoFar      | 2.68e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 262 ************
+Expected: 0.012 Actual: 0.012
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 1.29      |
+| EpIntrinsicRew/step | 0.000713  |
+| EpisodesSoFar       | 1.49e+03  |
+| EpLenMean           | 237       |
+| EpRew/step          | -1.57     |
+| EpThisIter          | 5         |
+| EpTotalRewMean      | -169      |
+| ev_tdlam_before     | -8.86e-05 |
+| MaxIntrinsicRew     | 0.0115    |
+| meankl              | 0.000868  |
+| optimgain           | 0.0118    |
+| surrgain            | 0.0118    |
+| TimeElapsed         | 5.12e+04  |
+| TimestepsSoFar      | 2.69e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 263 ************
