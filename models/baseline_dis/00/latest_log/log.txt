@@ -12327,3 +12327,24 @@ Stepsize OK!
 ----------------------------------
 save_state method is deprecated, please use save_variables instead
 ********** Iteration 587 ************
+Expected: 0.011 Actual: 0.011
+Stepsize OK!
+-----------------------------------
+| entloss             | 0         |
+| entropy             | 0.967     |
+| EpIntrinsicRew/step | 0         |
+| EpisodesSoFar       | 2.85e+03  |
+| EpLenMean           | 234       |
+| EpRew/step          | -1.49     |
+| EpThisIter          | 4         |
+| EpTotalRewMean      | -107      |
+| ev_tdlam_before     | -3.43e-05 |
+| MaxIntrinsicRew     | 0         |
+| meankl              | 0.000921  |
+| optimgain           | 0.0107    |
+| surrgain            | 0.0107    |
+| TimeElapsed         | 8.03e+04  |
+| TimestepsSoFar      | 6.02e+05  |
+-----------------------------------
+save_state method is deprecated, please use save_variables instead
+********** Iteration 588 ************
