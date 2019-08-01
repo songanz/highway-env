@@ -26,7 +26,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
             except KeyError:
                 cwd = os.getcwd()
                 CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
-                filename = 'Environment_model_discrete' + '_00.pth.tar'
+                filename = 'Environment_model_discrete_' + self.other_vehicles_type + self.spacing + '_00.pth.tar'
                 self.CVAE_path = os.path.join(CVAEdir, filename)
             super(HighwayEnvDis_imagine, self).__init__(config)
         state_size = self.observation_space.shape[0]
@@ -36,7 +36,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
             action_size = 1
         latent_size = (self.observation.vehicles_count-1)*action_size
         condi_size = state_size + action_size
-        self.env_model = CVAE(name='Environment_model_discrete',
+        self.env_model = CVAE(name='Environment_model_' + self.other_vehicles_type + self.spacing + '_discrete',
                               state_size=state_size,
                               action_size=action_size,
                               latent_size=latent_size,

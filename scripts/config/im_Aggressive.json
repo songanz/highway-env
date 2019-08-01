@@ -12,6 +12,6 @@
       "other_vehicles_type": "highway_env.vehicle.behavior.AggressiveVehicle",
       "centering_position": [0.3, 0.5],
       "collision_reward": -2,
-      "CVAE_path": "/models/CVAE/Environment_model_00.pth.tar"
+      "CVAE_path": "/models/CVAE/Environment_model_IDMVehicle1_00.pth.tar"
     }
 }

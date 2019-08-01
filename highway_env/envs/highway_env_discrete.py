@@ -79,6 +79,8 @@ class HighwayEnvDis(AbstractEnv):
             config = self.DEFAULT_CONFIG.copy()
             config.update(self.DIFFICULTY_LEVELS["MEDIUM"])
         config.update(self.DIFFICULTY_LEVELS[config["level"]])
+        self.other_vehicles_type = config['other_vehicles_type'].split('.')[-1]
+        self.spacing = str(config['initial_spacing'])
         super(HighwayEnvDis, self).__init__(config)
         self.reset()
         self.steps = 0

@@ -15,8 +15,6 @@ class HighwayEnvDis_intrinsic_rew(HighwayEnvDis):
     def __init__(self, config=None):  # create CVAE model
         self.device = 'cpu'
         self.terminal_num = 0
-        self.other_vehicles_type = config['other_vehicles_type'].split('.')[-1]
-        self.spacing = str(config['initial_spacing'])
         if not config:
             super(HighwayEnvDis_intrinsic_rew, self).__init__()
         else:
