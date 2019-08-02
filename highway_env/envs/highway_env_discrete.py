@@ -6,6 +6,7 @@ from highway_env import utils
 from highway_env.envs.abstract import AbstractEnv
 from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.control import MDPVehicle
+from highway_env.vehicle.control import ControlledVehicle
 
 
 class HighwayEnvDis(AbstractEnv):
@@ -109,7 +110,8 @@ class HighwayEnvDis(AbstractEnv):
             Create some new random vehicles of a given type, and add them on the road.
         """
         # Use MDPvehicle as the agent
-        self.vehicle = MDPVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
+        self.vehicle = ControlledVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
+        # self.vehicle = MDPVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
         self.road.vehicles.append(self.vehicle)
 
         vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])  # IDM from the config: can change
@@ -190,7 +192,8 @@ class HighwayEnvDis(AbstractEnv):
             return velocity_heading_punish
 
         # for debug
-        # print('rew_env: %8.4f;  rew_x: %8.4f;  rew_y: %8.4f;  rew_v: %8.4f' % (state_reward, rew_x, rew_y, rew_v))
+        # print('dx: %8.4f;  rew_x: %8.4f;  dy: %8.4f; rew_y: %8.4f;  vx: %8.4f;  rew_v: %8.4f' %
+        #       (dx, rew_x, dy, rew_y, vx, rew_v))
 
         return state_reward
 
