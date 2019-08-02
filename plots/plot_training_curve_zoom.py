@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-total_ep = 300
+total_ep = 500
 zoom_in = int(total_ep/10)
 
 episode = [i for i in range(total_ep)]  # x axis
@@ -12,9 +12,11 @@ surprise_dis_IDM = []
 baseline_dis_IDM = []
 
 # data
-for i in range(2):
-    surprise_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/Surprise_dis/0' + str(i) + '/latest_log/progress.csv')
-    baseline_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
+for i in range(5):
+    surprise_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/Surprise_dis_aggressive/0' + str(i) + '/latest_log/progress.csv')
+    # surprise_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/Surprise_dis/0' + str(i) + '/latest_log/progress.csv')
+    baseline_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/baseline_dis_aggressive/0' + str(i) + '/latest_log/progress.csv')
+    # baseline_dis_IDM_path = os.path.abspath(os.getcwd() + '/models/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
     surprise_dis_IDM.append(np.array(pd.read_csv(surprise_dis_IDM_path)['EpRew/step'])[:total_ep])
     baseline_dis_IDM.append(np.array(pd.read_csv(baseline_dis_IDM_path)['EpRew/step'])[:total_ep])
 

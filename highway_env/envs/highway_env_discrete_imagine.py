@@ -63,7 +63,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
                     self.im_old_ob = self.observation.observe()
                     self.vpred_im_mc = 0
                     # todo delete debug plot
-                    self.check_im(self.im)
+                    # self.check_im(self.im)
                     self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
                 if self.env_model.done or self.im_counter > self.im_length:
@@ -92,9 +92,9 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
                 return ob_next_im, rew_im, False, info
 
         # todo delete debug plot
-        self.check_im_cars(self.im)
-        plt.pause(0.001)
-        plt.cla()
+        # self.check_im_cars(self.im)
+        # plt.pause(0.001)
+        # plt.cla()
 
         self.im_path_num = 0
         old_s = self.observation.observe()
