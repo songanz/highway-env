@@ -8,10 +8,11 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
 
-env_json_path = os.path.abspath(cwd + '/scripts/config/im_Aggressive.json')
+env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 # last save name must be 'latest', otherwise check the trpo_mpi file
-save_path = os.path.abspath(cwd + '/models/Imagine_con/latest')
-load_path = os.path.abspath(cwd + '/models/baseline_con/00/latest')
+save_path = os.path.abspath(cwd + '/models/Imagine_con_IDM2Agg_wIDM_model/00/latest')
+load_path = os.path.abspath(cwd + '/models/baseline_con/00/latest')  # for loading policy
+CVAE_path = os.path.abspath(cwd + '/models/CVAE/Environment_model_IDMVehicle1_00.pth.tar')  # for loading the env model
 env = "highway-continuous-imagine-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
@@ -51,6 +52,9 @@ if __name__ == "__main__":
 
     if not [s for s in args if "--load_path=" in s]:
         args.append("--load_path=" + load_path)
+
+    if not [s for s in args if "--CVAE_path=" in s]:
+        args.append("--CVAE_path=" + CVAE_path)
 
     if not [s for s in args if "--log_path=" in s]:
         log_path = [s for s in args if "--save_path=" in s][0][12:]

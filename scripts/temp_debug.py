@@ -7,7 +7,7 @@ import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
-# env_json_path = os.path.abspath(cwd + '/scripts/config/im_IDM.json')
+# env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
 env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
 save_path = os.path.abspath(cwd + '/models/debug/latest')
 # load_path = os.path.abspath(cwd + '/models/Surprise/latest')

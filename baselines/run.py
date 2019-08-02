@@ -134,6 +134,8 @@ def build_env(args):
         if args.env_json:
             with open(args.env_json) as f:
                 env_kwargs = json.loads(f.read())  # need to corresponding to env.__init__ arguments
+            if args.CVAE_path:
+                env_kwargs["config"]["CVAE_path"] = args.CVAE_path
             env = make_vec_env(env_id, env_type, args.num_env or 1, seed,
                                env_kwargs=env_kwargs,
                                reward_scale=args.reward_scale,
