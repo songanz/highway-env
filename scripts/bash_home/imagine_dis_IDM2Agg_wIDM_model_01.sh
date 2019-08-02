@@ -6,4 +6,4 @@ python3 ./scripts/train_imagine.py \
 --save_path=/home/songanz/Documents/Git_repo/highway-env/models/Imagine_dis_IDM2Agg_wIDM_model/01/latest \
 --env_json=/home/songanz/Documents/Git_repo/highway-env/scripts/config/Aggressive.json \
 --load_path=/home/songanz/Documents/Git_repo/highway-env/models/baseline_dis/00/latest \
---CVAE_path=/home/songanz/Documents/Git_repo/highway-env/models/CVAE/Environment_model_IDMVehicle1_00.pth.tar
+--CVAE_path=/models/CVAE/Environment_model_IDMVehicle1_discrete_00.pth.tar

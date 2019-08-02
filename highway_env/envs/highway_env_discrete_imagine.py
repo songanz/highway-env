@@ -21,8 +21,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
             super(HighwayEnvDis_imagine, self).__init__()
         else:
             try:
-                CVAE_path = os.path.abspath(os.getcwd()+config.pop('CVAE_path'))
-                self.CVAE_path = CVAE_path[:-10] + 'discrete_00.pth.tar'
+                self.CVAE_path = os.path.abspath(os.getcwd()+config.pop('CVAE_path'))
             except KeyError:
                 cwd = os.getcwd()
                 CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
