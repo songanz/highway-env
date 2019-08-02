@@ -53,7 +53,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
         self.im_length = 16
         self.im_ep = 5
         # todo delete debug plot
-        self.im = []
+        self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
     def step(self, action, fear=False):
         gamma = 0.99
@@ -63,6 +63,7 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
                     self.im_old_ob = self.observation.observe()
                     self.vpred_im_mc = 0
                     # todo delete debug plot
+                    self.check_im(self.im)
                     self.im = [self.observation.reverse_normalize(self.im_old_ob)]
 
                 if self.env_model.done or self.im_counter > self.im_length:
@@ -86,10 +87,14 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
                         'imagine_done': self.env_model.done}
 
                 # todo delete debug plot
-                # self.im.append(self.observation.reverse_normalize(self.im_old_ob))
-                # self.check_im(self.im)
+                self.im.append(self.observation.reverse_normalize(self.im_old_ob))
 
                 return ob_next_im, rew_im, False, info
+
+        # todo delete debug plot
+        self.check_im_cars(self.im)
+        plt.pause(0.001)
+        plt.cla()
 
         self.im_path_num = 0
         old_s = self.observation.observe()
@@ -153,19 +158,36 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
 
     # todo check imagination path by visualization
     def check_im(self, im):
-        ori_obs = im[0]
         # Use absolute x position for better visulization
         x = np.array([im[i]['x'][:] + i/self.POLICY_FREQUENCY*im[i]['vx'][0] for i in range(len(im))])
         y = np.array([im[i]['y'][:] for i in range(len(im))])
+        ori_obs = im[0]
+        numCar = ori_obs.shape[0]
+        colors = ['C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9']
+
+        # plt.cla()  # clear current axis
+        ax = plt.gca()
+        ax.set_xlim(-100, 100)
+        ax.set_ylim(-2.3, 12.3)
+        ax.set_aspect('equal')
+
+        for i in range(numCar):
+            plt.plot(x[:,i], y[:,i], colors[i])
+        plt.grid(False)
+        # plt.pause(0.001)
+
+    # todo check imagination path by visualization
+    def check_im_cars(self, im):
+        ori_obs = im[0]
         numCar = ori_obs.shape[0]
         l = self.vehicle.LENGTH
         w = self.vehicle.WIDTH
         lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
         lane_width = self.road.network.get_lane(lane_index).width
         lane_num = len(self.road.network.lanes_list())
-        st = 0 - lane_width/2
+        st = 0 - lane_width / 2
 
-        plt.cla()  # clear current axis
+        # plt.cla()  # clear current axis
         ax = plt.gca()
         ax.set_xlim(-100, 100)
         ax.set_ylim(-2.3, 12.3)
@@ -173,17 +195,16 @@ class HighwayEnvDis_imagine(HighwayEnvDis):
 
         # plot lane boundary
         plt.plot([-100, 100], [st, st], "-k")  # black: lane boundary
-        for j in range(1, lane_num+1):
-            plt.plot([-100, 100], [st+j*lane_width, st+j*lane_width], "-k")
+        for j in range(1, lane_num + 1):
+            plt.plot([-100, 100], [st + j * lane_width, st + j * lane_width], "-k")
 
         for i in range(numCar):
             if i == 0:
-                car = mpatches.Rectangle((ori_obs['x'][i] - l/2, ori_obs['y'][i] - w/2), l, w)
+                car = mpatches.Rectangle((ori_obs['x'][i] - l / 2, ori_obs['y'][i] - w / 2), l, w)
                 car.set_fill(True)
             else:
-                car = mpatches.Rectangle((ori_obs['x'][i] - l/2, ori_obs['y'][i] - w/2), l, w)
+                car = mpatches.Rectangle((ori_obs['x'][i] - l / 2, ori_obs['y'][i] - w / 2), l, w)
                 car.set_fill(False)
             ax.add_patch(car)
-            plt.plot(x[:,i], y[:,i])
+
         plt.grid(False)
-        plt.pause(0.001)

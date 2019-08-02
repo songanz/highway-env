@@ -10,10 +10,10 @@ cwd = os.getcwd()
 
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 # last save name must be 'latest', otherwise check the trpo_mpi file
-save_path = os.path.abspath(cwd + '/models/Imagine_con_IDM2Agg_wIDM_model/00/latest')
-load_path = os.path.abspath(cwd + '/models/baseline_con/00/latest')  # for loading policy
-CVAE_path = '/models/CVAE/Environment_model_IDMVehicle1_00.pth.tar'  # for loading the env model
-env = "highway-continuous-imagine-v0"
+save_path = os.path.abspath(cwd + '/models/Imagine_dis_IDM2Agg_wIDM_model/00/latest')
+load_path = os.path.abspath(cwd + '/models/baseline_dis/00/latest')  # for loading policy
+CVAE_path = '/models/CVAE/Environment_model_IDMVehicle1_discrete_00.pth.tar'  # for loading the env model
+env = "highway-discrete-imagine-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
