@@ -295,7 +295,7 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         rew_y = np.exp(-dy ** 2 / (0.1 * lane_width ** 2)) - 1
         # rew_v
         # run as quick as possible but not speeding
-        rew_v = np.exp(-(vx - env.SPEED_MAX) ** 2 / (2 * 2 * (6 * env.ACCELERATION_RANGE) ** 2)) - 1
+        rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
 
         state_reward = (rew_v + rew_y + rew_x) / 3
 
