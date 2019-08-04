@@ -172,16 +172,17 @@ class HighwayEnvCon(AbstractEnv):
         sfDist = (self.NOM_DIST * self.LEN_SCL) + (vx - front_veh_vx) * self.NO_COLI_TIME  # calculate safe distance
 
         # keep safe distance
-        rew_x = 0
-        if dx < sfDist * self.SAFE_FACTOR:
+        # rew_x = 0
+        # if dx < sfDist * self.SAFE_FACTOR:
             # print('dx: %8.4f;  sfDist: %8.4f' % (dx, sfDist))
-            rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
+            # rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
         # in the center of lane
         rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
 
-        state_reward = (rew_v + rew_y + rew_x) / 3
+        # state_reward = (rew_v + rew_y + rew_x) / 3
+        state_reward = (rew_v + rew_y) / 2
 
         # crash for episode
         if self.vehicle.crashed:

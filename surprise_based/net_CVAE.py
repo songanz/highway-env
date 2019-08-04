@@ -286,10 +286,10 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
 
         # rew_x
         # keep safe distance
-        sfDist = (env.NOM_DIST * env.LEN_SCL) + (vx - front_veh_vx) * env.NO_COLI_TIME  # calculate safe distance
-        rew_x = 0
-        if dx < sfDist * env.SAFE_FACTOR:
-            rew_x = np.exp(-(dx - sfDist * env.SAFE_FACTOR) ** 2 / (2 * env.NOM_DIST ** 2)) - 1
+        # sfDist = (env.NOM_DIST * env.LEN_SCL) + (vx - front_veh_vx) * env.NO_COLI_TIME  # calculate safe distance
+        # rew_x = 0
+        # if dx < sfDist * env.SAFE_FACTOR:
+        #     rew_x = np.exp(-(dx - sfDist * env.SAFE_FACTOR) ** 2 / (2 * env.NOM_DIST ** 2)) - 1
         # rew_y
         # in the center of lane
         rew_y = np.exp(-dy ** 2 / (0.1 * lane_width ** 2)) - 1
@@ -297,7 +297,8 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         # run as quick as possible but not speeding
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
 
-        state_reward = (rew_v + rew_y + rew_x) / 3
+        # state_reward = (rew_v + rew_y + rew_x) / 3
+        state_reward = (rew_v + rew_y) / 2
 
         if check_collision(true_state):
             self.done = True
