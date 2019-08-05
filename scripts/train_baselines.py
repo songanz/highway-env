@@ -18,7 +18,7 @@ env = "highway-discrete-v0"
 
 DEFAULT_ARGUMENTS = [
     "--alg=trpo_mpi",
-    "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
+    "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
     "--network=mlp",

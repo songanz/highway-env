@@ -8,7 +8,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
 
-env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
+env_json_path = os.path.abspath(cwd + '/scripts/config/traffic_jam.json')
 save_eval_path = os.path.abspath(cwd + '/models/evaluation/temp')
 # last save name must be 'latest', otherwise check the trpo_mpi file
 load_path = os.path.abspath(cwd + '/models/Surprise_dis/00/latest')
