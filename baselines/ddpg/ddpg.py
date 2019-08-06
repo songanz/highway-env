@@ -43,6 +43,7 @@ def learn(network, env,
           eval_env=None,
           param_noise_adaption_interval=50,
           save_path=None,
+          load_path=None,
           **network_kwargs):
 
     set_global_seeds(seed)
@@ -103,6 +104,8 @@ def learn(network, env,
     sess.graph.finalize()
 
     agent.reset()
+    if load_path is not None:
+        agent.load(load_path)
 
     obs = env.reset()
     if eval_env is not None:

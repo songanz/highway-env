@@ -12,13 +12,13 @@ env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 # save_path = os.path.abspath(cwd + '/models/baseline_dis_aggressive/latest')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
 load_path = os.path.abspath(cwd + '/trails/00/latest')
-env = "highway-discrete-v0"
+env = "highway-continuous-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--alg=deepq",
+    "--alg=ddpg",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
@@ -30,6 +30,8 @@ DEFAULT_ARGUMENTS = [
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
     "--play"
+    # "--play",
+    # "--load_path=" + load_path
 ]
 
 if __name__ == "__main__":

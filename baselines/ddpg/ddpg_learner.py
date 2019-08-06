@@ -403,4 +403,7 @@ class DDPG(object):
             })
 
     def save(self, save_path):
-        tf_util.save_state(save_path, sess=self.sess)
+        tf_util.save_variables(save_path, sess=self.sess)
+
+    def load(self, save_path):
+        tf_util.load_variables(save_path, sess=self.sess)

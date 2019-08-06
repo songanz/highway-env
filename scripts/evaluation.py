@@ -13,14 +13,14 @@ save_eval_path = os.path.abspath(cwd + '/models/evaluation/temp')
 # last save name must be 'latest', otherwise check the trpo_mpi file
 # load_path = os.path.abspath(cwd + '/models/Surprise_dis/00/latest')
 # load_path = os.path.abspath(cwd + '/trails/dynamic_dv_0.5_trpo/Surprise_dis/00/latest')
-load_path = os.path.abspath(cwd + '/trails/dynamic_dv_5_ddpg/baseline_con/00/latest')
+load_path = os.path.abspath(cwd + '/trails/00/latest')
 env = "highway-continuous-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--alg=trpo_mpi",
+    "--alg=ddpg",
     "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
