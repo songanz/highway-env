@@ -30,8 +30,6 @@ DEFAULT_ARGUMENTS = [
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
     "--play"
-    # "--play",
-    # "--load_path=" + load_path
 ]
 
 if __name__ == "__main__":
