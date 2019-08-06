@@ -22,7 +22,7 @@ class ControlledVehicle(Vehicle):
     KP_LATERAL = 1 / 0.5  # [1/s]
     MAX_STEERING_ANGLE = np.pi / 3  # [rad]
 
-    DELTA_VELOCITY = 0.5  # [m/s]
+    DELTA_VELOCITY = 5  # [m/s]
 
     def __init__(self,
                  road,
