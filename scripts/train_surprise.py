@@ -17,7 +17,7 @@ env = "highway-discrete-intrinsic-rew-v0"
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--alg=trpo_mpi",
+    "--alg=ddpg",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
