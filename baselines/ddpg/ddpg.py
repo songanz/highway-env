@@ -42,6 +42,7 @@ def learn(network, env,
           tau=0.01,
           eval_env=None,
           param_noise_adaption_interval=50,
+          save_path=None,
           **network_kwargs):
 
     set_global_seeds(seed)
@@ -185,6 +186,11 @@ def learn(network, env,
                 epoch_critic_losses.append(cl)
                 epoch_actor_losses.append(al)
                 agent.update_target_net()
+
+            # save network
+            if save_path is not None and rank == 0:
+                save_path = os.path.expanduser(save_path)
+                agent.save(save_path)
 
             # Evaluate.
             eval_episode_rewards = []

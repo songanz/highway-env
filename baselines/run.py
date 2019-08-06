@@ -84,22 +84,13 @@ def train(args, extra_args):
 
     print('Training {} on {}:{} with arguments \n{}'.format(args.alg, env_type, env_id, alg_kwargs))
 
-    if args.alg == "trpo_mpi":  # I only add save_path argument to trpo_mpi
-        model = learn(
-            env=env,
-            seed=seed,
-            total_timesteps=total_timesteps,
-            save_path=save_path,
-            **alg_kwargs
-        )
-    else:
-        model = learn(
-            env=env,
-            seed=seed,
-            total_timesteps=total_timesteps,
-            **alg_kwargs
-        )
-
+    model = learn(
+        env=env,
+        seed=seed,
+        total_timesteps=total_timesteps,
+        save_path=save_path,
+        **alg_kwargs
+    )
 
     return model, env
 

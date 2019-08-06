@@ -9,15 +9,16 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 # last save name must be 'latest', otherwise check the trpo_mpi file
-save_path = os.path.abspath(cwd + '/models/baseline_dis_aggressive/latest')
-# load_path = os.path.abspath(cwd + '/models/baseline_dis_aggressive/00/latest')
+# save_path = os.path.abspath(cwd + '/models/baseline_dis_aggressive/latest')
+save_path = os.path.abspath(cwd + '/trails/00/latest')
+load_path = os.path.abspath(cwd + '/trails/00/latest')
 env = "highway-discrete-v0"
 
 # f = open(cwd + "/models/test.out", 'w')
 # sys.stdout = f
 
 DEFAULT_ARGUMENTS = [
-    "--alg=ddpg",
+    "--alg=deepq",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter

@@ -9,6 +9,8 @@ from baselines import logger
 from baselines.common.mpi_adam import MpiAdam
 import baselines.common.tf_util as U
 from baselines.common.mpi_running_mean_std import RunningMeanStd
+from baselines.common import tf_util
+
 try:
     from mpi4py import MPI
 except ImportError:
@@ -399,3 +401,6 @@ class DDPG(object):
             self.sess.run(self.perturb_policy_ops, feed_dict={
                 self.param_noise_stddev: self.param_noise.current_stddev,
             })
+
+    def save(self, save_path):
+        tf_util.save_state(save_path, sess=self.sess)
