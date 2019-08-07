@@ -51,27 +51,27 @@ if __name__ == "__main__":
 
     # User should not specify the log_path, the log will in the same directory as the save_path
     try:
+        # remove accidentally added log_path
         log_itm = [s for s in args if "--log_path" in s][0]
         args.remove(log_itm)
     except IndexError:
         pass
 
     t = int(0)
-    if [s for s in args if "--save_path" in s]:
-        itm = [s for s in args if "--save_path" in s][0]
-        fullpath = itm.split("=")[1]
-        directory = os.path.dirname(fullpath)
-        filename = fullpath.split(directory)[1]
-        if os.path.exists(directory):
-            args.remove(itm)
-            new_dir = directory
-            while os.path.exists(new_dir):
-                t += 1
-                new_dir = directory[:-1] + str(t)
-            args.append("--save_path=" + new_dir + filename)
-            args.append("--log_path=" + new_dir + filename + '_log')
-        else:
-            args.append("--log_path=" + directory + filename + '_log')
+    # Will not raise any error, sine the save_path is in DEFAULT_ARGUMENTS
+    itm = [s for s in args if "--save_path" in s][0]
+    fullpath = itm.split("=")[1]
+    directory = os.path.dirname(fullpath)
+    filename = fullpath.split(directory)[1]
+    if os.path.exists(directory):
+        args.remove(itm)
+        new_dir = directory
+        while os.path.exists(new_dir):
+            t += 1
+            new_dir = directory[:-1] + str(t)
+        args.append("--save_path=" + new_dir + filename)
+        args.append("--log_path=" + new_dir + filename + '_log')
+    else:
+        args.append("--log_path=" + directory + filename + '_log')
 
     run.main(args)  # for training
-    # run.animation(args)  # for animation
