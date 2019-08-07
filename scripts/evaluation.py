@@ -10,7 +10,7 @@ cwd = os.getcwd()
 
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 save_eval_path = os.path.abspath(cwd + '/models/evaluation/00')
-load_path = os.path.abspath(cwd + '/trails/00/latest')
+load_path = os.path.abspath(cwd + '/trails/02/latest')
 env = "highway-continuous-v0"
 
 DEFAULT_ARGUMENTS = [
@@ -30,8 +30,6 @@ DEFAULT_ARGUMENTS = [
     "--save_eval_path=" + save_eval_path,
     "--env_json=" + env_json_path,
     "--load_path=" + load_path,
-
-    "--play"
 ]
 
 def get_dict_from_list(l):
@@ -77,4 +75,5 @@ if __name__ == "__main__":
     else:
         args.append("--log_path=" + fullpath + '_log')
 
+    args.append('--play')  # for showing the animation
     run.animation(args)  # for evaluation

@@ -242,7 +242,6 @@ def main(args):
     if args.save_path is not None and rank == 0:
         save_path = osp.expanduser(args.save_path)
         model.save(save_path)
-        # model.save_variables(save_path)  # todo: don't know which is better
 
     if args.play:
         logger.log("Running trained model")
@@ -272,8 +271,6 @@ def main(args):
     return model
 
 def animation(args):
-    # sess = tf.Session()
-    # configure logger, disable logging in child MPI processes (with rank > 0)
 
     arg_parser = common_arg_parser()
     args, unknown_args = arg_parser.parse_known_args(args)
@@ -320,7 +317,6 @@ def animation(args):
     with tf.variable_scope("pi"):
         model = model_(observ_placeholder=ob)
     U.initialize()
-    # model.load_variables(load_path)
     model.load(load_path)
     mean_reward = []
     crash = 0

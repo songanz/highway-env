@@ -52,7 +52,7 @@ class ActWrapper(object):
         kwargs.pop('M', None)
         return self._act([observation], **kwargs), None, None, None
 
-    def save_act(self, path=None):
+    def save(self, path=None):
         """Save model to a pickle located at `path`"""
         if path is None:
             path = os.path.join(logger.get_dir(), "model.pkl")
@@ -71,8 +71,18 @@ class ActWrapper(object):
         with open(path, "wb") as f:
             cloudpickle.dump((model_data, self._act_params), f)
 
-    def save(self, path):
-        save_variables(path)
+    @staticmethod
+    def load(path):
+        with open(path, "rb") as f:
+            model_data, _ = cloudpickle.load(f)
+
+        with tempfile.TemporaryDirectory() as td:
+            arc_path = os.path.join(td, "packed.zip")
+            with open(arc_path, "wb") as f:
+                f.write(model_data)
+
+            zipfile.ZipFile(arc_path, 'r', zipfile.ZIP_DEFLATED).extractall(td)
+            load_variables(os.path.join(td, "model"))
 
 
 def load_act(path):
@@ -103,7 +113,7 @@ def learn(env,
           train_freq=1,
           batch_size=32,
           print_freq=100,
-          checkpoint_freq=10000,
+          checkpoint_freq=100,
           save_path=None,
           learning_starts=1000,
           gamma=1.0,
@@ -246,18 +256,18 @@ def learn(env,
     reset = True
 
     with tempfile.TemporaryDirectory() as td:
-        td = save_path or td
+        td = os.path.dirname(save_path) or td
 
-        model_file = os.path.join(td, "model")
+        model_file = save_path
         model_saved = False
 
         if tf.train.latest_checkpoint(td) is not None:
-            load_variables(model_file)
+            act.load(model_file)
             logger.log('Loaded model from {}'.format(model_file))
             model_saved = True
         elif load_path is not None:
-            load_path = os.path.join(load_path, "model")
-            load_variables(load_path)
+            # load_path = os.path.join(load_path, "model")
+            act.load(load_path)
             logger.log('Loaded model from {}'.format(load_path))
 
 
@@ -331,13 +341,13 @@ def learn(env,
                     if print_freq is not None:
                         logger.log("Saving model due to mean reward increase: {} -> {}".format(
                                    saved_mean_reward, mean_100ep_reward))
-                    save_variables(model_file)
+                    act.save(model_file)
                     model_saved = True
                     saved_mean_reward = mean_100ep_reward
 
         if model_saved:
             if print_freq is not None:
                 logger.log("Restored model with mean reward: {}".format(saved_mean_reward))
-            load_variables(model_file)
+            act.load(model_file)
 
     return act

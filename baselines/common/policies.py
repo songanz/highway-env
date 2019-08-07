@@ -113,15 +113,9 @@ class PolicyWithValue(object):
         return self._evaluate(self.vf, ob, *args, **kwargs)
 
     def save(self, save_path):
-        tf_util.save_state(save_path, sess=self.sess)
-
-    def load(self, load_path):
-        tf_util.load_state(load_path, sess=self.sess)
-
-    def save_variables(self, save_path):
         tf_util.save_variables(save_path, sess=self.sess)
 
-    def load_variables(self, load_path):
+    def load(self, load_path):
         tf_util.load_variables(load_path, sess=self.sess)
 
 

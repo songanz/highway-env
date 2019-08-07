@@ -321,27 +321,6 @@ def get_available_gpus(session_config=None):
 # ================================================================
 # Saving variables
 # ================================================================
-
-def load_state(fname, sess=None):
-    from baselines import logger
-    logger.warn('load_state method is deprecated, please use load_variables instead')
-    sess = sess or get_session()
-    saver = tf.train.Saver()
-    saver.restore(tf.get_default_session(), fname)
-
-def save_state(fname, sess=None):
-    from baselines import logger
-    logger.warn('save_state method is deprecated, please use save_variables instead')
-    sess = sess or get_session()
-    dirname = os.path.dirname(fname)
-    if any(dirname):
-        os.makedirs(dirname, exist_ok=True)
-    saver = tf.train.Saver()
-    saver.save(tf.get_default_session(), fname)
-
-# The methods above and below are clearly doing the same thing, and in a rather similar way
-# TODO: ensure there is no subtle differences and remove one
-
 def save_variables(save_path, variables=None, sess=None):
     import joblib
     sess = sess or get_session()
