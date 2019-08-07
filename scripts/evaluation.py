@@ -10,18 +10,13 @@ cwd = os.getcwd()
 
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 save_eval_path = os.path.abspath(cwd + '/models/evaluation/temp')
-# last save name must be 'latest', otherwise check the trpo_mpi file
-# load_path = os.path.abspath(cwd + '/models/Surprise_dis/00/latest')
-# load_path = os.path.abspath(cwd + '/trails/dynamic_dv_0.5_trpo/Surprise_dis/00/latest')
-load_path = os.path.abspath(cwd + '/trails/00/latest')
+load_path = os.path.abspath(cwd + '/trails/temp/latest')
 env = "highway-continuous-v0"
 
-# f = open(cwd + "/models/test.out", 'w')
-# sys.stdout = f
-
 DEFAULT_ARGUMENTS = [
-    "--alg=ddpg",
-    "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
+    "--env=" + env,
+    "--alg=trpo_mpi",
+    "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
     "--network=mlp",
@@ -31,33 +26,32 @@ DEFAULT_ARGUMENTS = [
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
+
+    "--save_eval_path=" + save_eval_path,
+    "--env_json=" + env_json_path,
+    "--log_path=" + save_eval_path + "_log",
+    "--load_path=" + load_path,
+
     "--play"
 ]
 
+def get_dict_from_list(l):
+    d = {}
+    temp = [s.split('=')[0] for s in l]
+    for x in range(len(temp)):
+        try:
+            d[temp[x]] = [a.split('=') for a in l][x][1]
+        except IndexError:
+            continue
+    return d
+
 if __name__ == "__main__":
     args = sys.argv
-    if len(args) <= 1:
-        args = DEFAULT_ARGUMENTS
-    else:
-        DEFAULT_ARGUMENTS.extend(args)
-        args = DEFAULT_ARGUMENTS
+    
+    args_dic = get_dict_from_list(args)
+    default_args_dic = get_dict_from_list(DEFAULT_ARGUMENTS)
 
-    if not [s for s in args if "--save_eval_path=" in s]:
-        args.append("--save_eval_path=" + save_eval_path)
+    for i in [s for s in default_args_dic.keys() if s not in args_dic.keys()]:
+        args.append(i + '=' + default_args_dic[i])
 
-    if not [s for s in args if "--env=" in s]:
-        args.append("--env=" + env)
-
-    if not [s for s in args if "--env_json=" in s]:
-        args.append("--env_json=" + env_json_path)
-
-    if not [s for s in args if "--load_path=" in s]:
-        args.append("--load_path=" + load_path)
-
-    if not [s for s in args if "--log_path=" in s]:
-        log_path = [s for s in args if "--save_eval_path=" in s][0][17:]
-        args.append("--log_path=" + log_path + "_log")
-
-    # run.main(args)  # for training
     run.animation(args)  # for animation
-    # f.close()
