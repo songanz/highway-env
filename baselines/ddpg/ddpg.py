@@ -101,11 +101,12 @@ def learn(network, env,
     sess = U.get_session()
     # Prepare everything.
     agent.initialize(sess)
-    sess.graph.finalize()
 
     agent.reset()
     if load_path is not None:
         agent.load(load_path)
+
+    sess.graph.finalize()
 
     obs = env.reset()
     if eval_env is not None:
@@ -279,6 +280,5 @@ def learn(network, env,
             if eval_env and hasattr(eval_env, 'get_state'):
                 with open(os.path.join(logdir, 'eval_env_state.pkl'), 'wb') as f:
                     pickle.dump(eval_env.get_state(), f)
-
 
     return agent
