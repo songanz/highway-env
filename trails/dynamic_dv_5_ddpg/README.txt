@@ -1,1 +1,0 @@
-This is for ddpg continuous, dynamic controlled vehicle DELTAVELOSITY = 5 m/s

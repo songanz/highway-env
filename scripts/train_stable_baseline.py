@@ -1,6 +1,5 @@
 import os
-import stable_baselines
-import baselines.run as run
+import stable_baselines.run as run
 import highway_env  # don't remove, for registration the new game
 import sys
 
@@ -18,10 +17,9 @@ DEFAULT_ARGUMENTS = [
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
-    "--network=mlp",
-    "--num_layers=3",
-    "--num_hidden=124",
-    "--activation=tf.tanh",
+    "--network=MlpPolicy",
+    "--act_fun=tf.tanh",
+    "--layers=[124,124,124]",
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
