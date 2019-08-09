@@ -70,7 +70,7 @@ class SAC(OffPolicyRLModel):
                  learning_starts=100, train_freq=1, batch_size=64,
                  tau=0.005, ent_coef='auto', target_update_interval=1,
                  gradient_steps=1, target_entropy='auto', action_noise=None,
-                 random_exploration=0.0, verbose=0, tensorboard_log=None,
+                 random_exploration=0.0, verbose=1, tensorboard_log=None,
                  _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
 
         super(SAC, self).__init__(policy=policy, env=env, replay_buffer=None, verbose=verbose,
