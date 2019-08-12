@@ -381,6 +381,7 @@ class SAC(OffPolicyRLModel):
 
             start_time = time.time()
             episode_rewards = [0.0]
+            episode_step_lenth = [0]
             episode_successes = []
             if self.action_noise is not None:
                 self.action_noise.reset()
@@ -458,12 +459,14 @@ class SAC(OffPolicyRLModel):
                         infos_values = np.mean(mb_infos_vals, axis=0)
 
                 episode_rewards[-1] += reward
+                episode_step_lenth[-1] += 1
                 if done:
                     if self.action_noise is not None:
                         self.action_noise.reset()
                     if not isinstance(self.env, VecEnv):
                         obs = self.env.reset()
                     episode_rewards.append(0.0)
+                    episode_step_lenth.append(0)
 
                     maybe_is_success = info.get('is_success')
                     if maybe_is_success is not None:
@@ -471,8 +474,11 @@ class SAC(OffPolicyRLModel):
 
                 if len(episode_rewards[-101:-1]) == 0:
                     mean_reward = -np.inf
+                    mean_100ep_reward_per_step = -np.inf
                 else:
                     mean_reward = round(float(np.mean(episode_rewards[-101:-1])), 1)
+                    mean_100ep_reward_per_step = np.mean(np.array(episode_rewards[-101:-1]) /
+                                                         np.array(episode_step_lenth[-101:-1]))
 
                 num_episodes = len(episode_rewards)
                 self.num_timesteps += 1
@@ -481,6 +487,7 @@ class SAC(OffPolicyRLModel):
                     fps = int(step / (time.time() - start_time))
                     logger.logkv("episodes", num_episodes)
                     logger.logkv("mean 100 episode reward", mean_reward)
+                    logger.logkv("mean 100 episode reward per step", mean_100ep_reward_per_step)
                     if len(ep_info_buf) > 0 and len(ep_info_buf[0]) > 0:
                         logger.logkv('ep_rewmean', safe_mean([ep_info['r'] for ep_info in ep_info_buf]))
                         logger.logkv('eplenmean', safe_mean([ep_info['l'] for ep_info in ep_info_buf]))
