@@ -229,7 +229,7 @@ def learn(network, env,
         combined_stats['rollout/return'] = np.mean(epoch_episode_rewards)
         combined_stats['rollout/return_std'] = np.std(epoch_episode_rewards)
         combined_stats['rollout/return_history_mean'] = np.mean(episode_rewards_history)
-        combined_stats['rollout/return_per_step_mean'] = np.mean(np.array(list(episode_rewards_history)[-101:-1])
+        combined_stats['rollout/return_per_step_mean'] = np.mean(np.array(epoch_episode_rewards[-101:-1])
                                                                  /np.array(epoch_episode_steps[-101:-1]))
         combined_stats['rollout/return_history_std'] = np.std(episode_rewards_history)
         combined_stats['rollout/episode_steps_mean'] = np.mean(epoch_episode_steps)
