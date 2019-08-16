@@ -40,7 +40,7 @@ fig.set_size_inches(7,4)
 
 # Draw lines
 plt.plot(ddqn_time_steps, deepq_dis_IDM_m, color="#111111", label="DDQN")
-plt.plot(trpo_time_steps, trpo_dis_IDM_m, color="#004ec9", label="Baseline TRPO")
+plt.plot(trpo_time_steps, trpo_dis_IDM_m, color="#004ec9", label="TRPO")
 
 # Draw bands
 plt.fill_between(ddqn_time_steps, deepq_dis_IDM_m - deepq_dis_IDM_s,

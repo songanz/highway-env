@@ -52,7 +52,7 @@ fig.set_size_inches(7,4)
 # Draw lines
 plt.plot(ddpg_time_steps, ddpg_con_IDM_m, color="#111111", label="DDPG")
 plt.plot(sac_time_steps, sac_con_IDM_m, color="#FF3333", label="SAC")
-plt.plot(trpo_time_steps, trpo_con_IDM_m, color="#004ec9", label="Baseline TRPO")
+plt.plot(trpo_time_steps, trpo_con_IDM_m, color="#004ec9", label="TRPO")
 
 # Draw bands
 plt.fill_between(ddpg_time_steps, ddpg_con_IDM_m - ddpg_con_IDM_s,
