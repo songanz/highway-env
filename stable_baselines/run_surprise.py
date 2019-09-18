@@ -155,7 +155,9 @@ def get_env_type(args):
 
 def get_alg_module(args, _env, alg_kwargs, submodule=None):
     submodule = submodule or args.alg
-    alg_module = import_module('.'.join(['stable_baselines', args.alg]))
+    # remember to check the surprise_off_po/packages __init__.py file. It is the entry point of the package
+    # check all the import part in surprise_off_po/packages
+    alg_module = import_module('.'.join(['stable_baselines.surprise_off_po', args.alg]))  # the alg from sur folder
     policy = alg_kwargs.pop('network', None)
     alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs)
 

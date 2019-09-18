@@ -1,6 +1,6 @@
 import os
 import stable_baselines.run as run
-import stable_baselines.surprise_off_po.run_surprise as run_sur
+import stable_baselines.run_surprise as run_sur
 import highway_env  # don't remove, for registration the new game
 import sys
 
@@ -12,15 +12,9 @@ env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
 env = "highway-discrete-intrinsic-rew-v0"
 
-if 'intrinsic-rew' in env:
-    Sur = True
-    env.replace('intrinsic-rew-', '')
-else:
-    Sur = False
-
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
-    "--alg=trpo_mpi",
+    "--alg=dqn",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
@@ -79,6 +73,15 @@ if __name__ == "__main__":
         args.append("--log_path=" + new_dir + filename + '_log')
     else:
         args.append("--log_path=" + directory + filename + '_log')
+
+    if 'intrinsic-rew' in [s for s in args if "--env=" in s][0] and\
+            "trpo" not in [s for s in args if "--alg=" in s][0]:  # only for off-policy method
+        Sur = True
+        item = [s for s in args if "--env=" in s][0]
+        ind = args.index(item)
+        args[ind] = args[ind].replace('intrinsic-rew-', '')
+    else:
+        Sur = False
 
     if Sur:
         run_sur.main(args)
