@@ -11,8 +11,8 @@ trpo_time_steps = []
 
 # load data
 for i in range(1):
-    deepq_dis_IDM_path = os.path.abspath(os.getcwd() + '/trails/dynamic_dv_5_ddqn/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
-    trpo_dis_IDM_path = os.path.abspath(os.getcwd() + '/trails/dynamic_dv_5_trpo/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
+    deepq_dis_IDM_path = os.path.abspath(os.getcwd() + '/trails/ddqn/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
+    trpo_dis_IDM_path = os.path.abspath(os.getcwd() + '/trails/trpo/baseline_dis/0' + str(i) + '/latest_log/progress.csv')
 
     ddqn_dis_IDM.append(np.array(pd.read_csv(deepq_dis_IDM_path)['mean 100 episode reward per step']))
     ddqn_time_steps.append(np.array(pd.read_csv(deepq_dis_IDM_path)['steps']))

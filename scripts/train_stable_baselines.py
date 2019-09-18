@@ -1,5 +1,6 @@
 import os
 import stable_baselines.run as run
+import stable_baselines.surprise.run_surprise as run_sur
 import highway_env  # don't remove, for registration the new game
 import sys
 
@@ -9,7 +10,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
-env = "highway-discrete-v0"
+env = "highway-discrete-intrinsic-rew-v0"
+
+if 'intrinsic-rew' in env:
+    Sur = True
+    env.replace('intrinsic-rew-', '')
+else:
+    Sur = False
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
@@ -73,4 +80,7 @@ if __name__ == "__main__":
     else:
         args.append("--log_path=" + directory + filename + '_log')
 
-    run.main(args)  # for training
+    if Sur:
+        run_sur.main(args)
+    else:
+        run.main(args)  # for training
