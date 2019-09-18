@@ -1,15 +1,10 @@
 from __future__ import division, print_function, absolute_import
 import numpy as np
-from gym import spaces
 import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-
-from highway_env import utils
+from baselines.surprise_based.net_CVAE import *
 from highway_env.envs.highway_env_discrete import HighwayEnvDis
-from highway_env.road.road import Road, RoadNetwork
-from highway_env.vehicle.dynamics import Vehicle
-from surprise_based.net_CVAE import *
 
 
 class HighwayEnvDis_imagine(HighwayEnvDis):

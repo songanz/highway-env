@@ -1,6 +1,6 @@
 import os
 import stable_baselines.run as run
-import stable_baselines.surprise.run_surprise as run_sur
+import stable_baselines.surprise_off_po.run_surprise as run_sur
 import highway_env  # don't remove, for registration the new game
 import sys
 

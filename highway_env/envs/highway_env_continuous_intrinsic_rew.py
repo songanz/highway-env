@@ -1,13 +1,7 @@
 from __future__ import division, print_function, absolute_import
-import numpy as np
-from gym import spaces
 import os
-
-from highway_env import utils
+from baselines.surprise_based.net_CVAE import *
 from highway_env.envs.highway_env_continuous import HighwayEnvCon
-from highway_env.road.road import Road, RoadNetwork
-from highway_env.vehicle.dynamics import Vehicle
-from surprise_based.net_CVAE import *
 
 
 class HighwayEnvCon_intrinsic_rew(HighwayEnvCon):
