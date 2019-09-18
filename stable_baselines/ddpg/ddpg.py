@@ -18,7 +18,7 @@ from stable_baselines.common.mpi_adam import MpiAdam
 from stable_baselines.ddpg.policies import DDPGPolicy
 from stable_baselines.common.mpi_running_mean_std import RunningMeanStd
 from stable_baselines.a2c.utils import total_episode_reward_logger
-from stable_baselines.deepq.replay_buffer import ReplayBuffer
+from stable_baselines.dqn.replay_buffer import ReplayBuffer
 
 
 def normalize(tensor, stats):
@@ -148,7 +148,7 @@ class DDPG(OffPolicyRLModel):
     :param env: (Gym environment or str) The environment to learn from (if registered in Gym, can be str)
     :param gamma: (float) the discount factor
     :param memory_policy: (ReplayBuffer) the replay buffer
-        (if None, default to baselines.deepq.replay_buffer.ReplayBuffer)
+        (if None, default to baselines.dqn.replay_buffer.ReplayBuffer)
 
         .. deprecated:: 2.6.0
             This parameter will be removed in a future version

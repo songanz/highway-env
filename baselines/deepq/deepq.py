@@ -128,7 +128,7 @@ def learn(env,
           load_path=None,
           **network_kwargs
             ):
-    """Train a deepq model.
+    """Train a dqn model.
 
     Parameters
     -------
@@ -137,7 +137,7 @@ def learn(env,
     network: string or a function
         neural network to use as a q function approximator. If string, has to be one of the names of registered models in baselines.common.models
         (mlp, cnn, conv_only). If a function, should take an observation tensor and return a latent variable tensor, which
-        will be mapped to the Q function heads (see build_q_func in baselines.deepq.models for details on that)
+        will be mapped to the Q function heads (see build_q_func in baselines.dqn.models for details on that)
     seed: int or None
         prng seed. The runs with the same seed "should" give the same results. If None, no seeding is used.
     lr: float
@@ -195,7 +195,7 @@ def learn(env,
     -------
     act: ActWrapper
         Wrapper over act function. Adds ability to save it and load it.
-        See header of baselines/deepq/categorical.py for details on the act function.
+        See header of baselines/dqn/categorical.py for details on the act function.
     """
     # Create all the functions necessary to train the model
 

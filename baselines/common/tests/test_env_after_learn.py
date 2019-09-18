@@ -6,7 +6,7 @@ from baselines.common.vec_env.subproc_vec_env import SubprocVecEnv
 from baselines.run import get_learn_function
 from baselines.common.tf_util import make_session
 
-algos = ['a2c', 'acer', 'acktr', 'deepq', 'ppo2', 'trpo_mpi']
+algos = ['a2c', 'acer', 'acktr', 'dqn', 'ppo2', 'trpo_mpi']
 
 @pytest.mark.parametrize('algo', algos)
 def test_env_after_learn(algo):

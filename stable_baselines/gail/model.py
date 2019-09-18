@@ -1,7 +1,7 @@
-from stable_baselines.trpo_mpi import TRPO
+from stable_baselines.trpo_mpi import TRPO_MPI
 
 
-class GAIL(TRPO):
+class GAIL(TRPO_MPI):
     """
     Generative Adversarial Imitation Learning (GAIL)
 

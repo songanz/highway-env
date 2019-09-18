@@ -6,9 +6,9 @@ import numpy as np
 import tensorflow as tf
 
 import stable_baselines.common.tf_util as tf_utils
-from stable_baselines import logger, deepq
-from stable_baselines.deepq.replay_buffer import ReplayBuffer
-from stable_baselines.deepq.policies import FeedForwardPolicy
+from stable_baselines import logger, dqn
+from stable_baselines.dqn.replay_buffer import ReplayBuffer
+from stable_baselines.dqn.policies import FeedForwardPolicy
 from stable_baselines.common.schedules import LinearSchedule
 
 
@@ -28,7 +28,7 @@ def main(args):
         # Create the environment
         env = gym.make("CartPole-v0")
         # Create all the functions necessary to train the model
-        act, train, update_target, _ = deepq.build_train(
+        act, train, update_target, _ = dqn.build_train(
             q_func=CustomPolicy,
             ob_space=env.observation_space,
             ac_space=env.action_space,

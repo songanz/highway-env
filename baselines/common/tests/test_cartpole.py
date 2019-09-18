@@ -16,7 +16,7 @@ learn_kwargs = {
     'a2c' : dict(nsteps=32, value_network='copy', lr=0.05),
     'acer': dict(value_network='copy'),
     'acktr': dict(nsteps=32, value_network='copy', is_async=False),
-    'deepq': dict(total_timesteps=20000),
+    'dqn': dict(total_timesteps=20000),
     'ppo2': dict(value_network='copy'),
     'trpo_mpi': {}
 }

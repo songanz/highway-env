@@ -14,7 +14,7 @@ from functools import partial
 
 
 learn_kwargs = {
-    'deepq': {},
+    'dqn': {},
     'a2c': {},
     'acktr': {},
     'acer': {},
@@ -38,7 +38,7 @@ def test_serialization(learn_fn, network_fn):
     '''
 
 
-    if network_fn.endswith('lstm') and learn_fn in ['acer', 'acktr', 'trpo_mpi', 'deepq']:
+    if network_fn.endswith('lstm') and learn_fn in ['acer', 'acktr', 'trpo_mpi', 'dqn']:
             # TODO make acktr work with recurrent policies
             # and test
             # github issue: https://github.com/openai/baselines/issues/660
@@ -89,12 +89,12 @@ def test_coexistence(learn_fn, network_fn):
     Test if more than one model can exist at a time
     '''
 
-    if learn_fn == 'deepq':
+    if learn_fn == 'dqn':
             # TODO enable multiple DQN models to be useable at the same time
             # github issue https://github.com/openai/baselines/issues/656
             return
 
-    if network_fn.endswith('lstm') and learn_fn in ['acktr', 'trpo_mpi', 'deepq']:
+    if network_fn.endswith('lstm') and learn_fn in ['acktr', 'trpo_mpi', 'dqn']:
             # TODO make acktr work with recurrent policies
             # and test
             # github issue: https://github.com/openai/baselines/issues/660

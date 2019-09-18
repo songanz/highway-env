@@ -1,0 +1,1 @@
+Logging to /home/songan/Documents/git_repo/highway-env/trails/07/latest_log

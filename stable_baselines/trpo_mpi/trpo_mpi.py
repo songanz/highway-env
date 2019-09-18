@@ -18,7 +18,7 @@ from stable_baselines.a2c.utils import total_episode_reward_logger
 from stable_baselines.trpo_mpi.utils import traj_segment_generator, add_vtarg_and_adv, flatten_lists
 
 
-class TRPO(ActorCriticRLModel):
+class TRPO_MPI(ActorCriticRLModel):
     """
     Trust Region Policy Optimization (https://arxiv.org/abs/1502.05477)
 
@@ -44,8 +44,8 @@ class TRPO(ActorCriticRLModel):
     def __init__(self, policy, env, gamma=0.99, timesteps_per_batch=1024, max_kl=0.01, cg_iters=10, lam=0.98,
                  entcoeff=0.0, cg_damping=1e-2, vf_stepsize=3e-4, vf_iters=3, verbose=0, tensorboard_log=None,
                  _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
-        super(TRPO, self).__init__(policy=policy, env=env, verbose=verbose, requires_vec_env=False,
-                                   _init_setup_model=_init_setup_model, policy_kwargs=policy_kwargs)
+        super(TRPO_MPI, self).__init__(policy=policy, env=env, verbose=verbose, requires_vec_env=False,
+                                       _init_setup_model=_init_setup_model, policy_kwargs=policy_kwargs)
 
         self.using_gail = False
         self.timesteps_per_batch = timesteps_per_batch

@@ -1,5 +1,5 @@
 from stable_baselines.a2c import A2C
-from stable_baselines.deepq import DQN
+from stable_baselines.dqn import DQN
 from stable_baselines.her import HER
 from stable_baselines.ppo2 import PPO2
 from stable_baselines.td3 import TD3
@@ -14,7 +14,7 @@ except ImportError:
 
 if mpi4py is not None:
     from stable_baselines.gail import GAIL
-    from stable_baselines.trpo_mpi import TRPO
+    from stable_baselines.trpo_mpi import TRPO_MPI
 del mpi4py
 
 __version__ = "2.7.0"

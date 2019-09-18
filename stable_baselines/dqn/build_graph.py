@@ -85,7 +85,7 @@ def scope_vars(scope, trainable_only=False):
 
 def scope_name():
     """
-    Returns the name of current scope as a string, e.g. deepq/q_func
+    Returns the name of current scope as a string, e.g. dqn/q_func
 
     :return: (str) the name of current scope
     """
@@ -320,7 +320,7 @@ def build_act_with_param_noise(q_func, ob_space, ac_space, stochastic_ph, update
 
 
 def build_train(q_func, ob_space, ac_space, optimizer, sess, grad_norm_clipping=None,
-                gamma=1.0, double_q=True, scope="deepq", reuse=None,
+                gamma=1.0, double_q=True, scope="dqn", reuse=None,
                 param_noise=False, param_noise_filter_func=None, full_tensorboard_log=False):
     """
     Creates the train function:

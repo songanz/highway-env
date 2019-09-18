@@ -3,7 +3,7 @@ import argparse
 import gym
 import numpy as np
 
-from stable_baselines.deepq import DQN, MlpPolicy
+from stable_baselines.dqn import DQN, MlpPolicy
 
 
 def callback(lcl, _glb):

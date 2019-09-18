@@ -4,12 +4,12 @@ import tensorflow as tf
 import numpy as np
 import gym
 
-from stable_baselines import logger, deepq
+from stable_baselines import logger, dqn
 from stable_baselines.common import tf_util, OffPolicyRLModel, SetVerbosity, TensorboardWriter
 from stable_baselines.common.vec_env import VecEnv
 from stable_baselines.common.schedules import LinearSchedule
-from stable_baselines.deepq.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
-from stable_baselines.deepq.policies import DQNPolicy
+from stable_baselines.dqn.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
+from stable_baselines.dqn.policies import DQNPolicy
 from stable_baselines.a2c.utils import total_episode_reward_logger
 
 
@@ -122,7 +122,7 @@ class DQN(OffPolicyRLModel):
 
                 optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
 
-                self.act, self._train_step, self.update_target, self.step_model = deepq.build_train(
+                self.act, self._train_step, self.update_target, self.step_model = dqn.build_train(
                     q_func=partial(self.policy, **self.policy_kwargs),
                     ob_space=self.observation_space,
                     ac_space=self.action_space,
@@ -134,7 +134,7 @@ class DQN(OffPolicyRLModel):
                     full_tensorboard_log=self.full_tensorboard_log
                 )
                 self.proba_step = self.step_model.proba_step
-                self.params = tf_util.get_trainable_vars("deepq")
+                self.params = tf_util.get_trainable_vars("dqn")
 
                 # Initialize the parameters and copy them to the target network.
                 tf_util.initialize(self.sess)
