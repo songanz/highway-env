@@ -38,7 +38,7 @@ except ImportError:
 _game_envs = defaultdict(set)
 for env in gym.envs.registry.all():
     # TODO: solve this with regexes
-    env_type = env._entry_point.split(':')[0].split('.')[-1]
+    env_type = env.entry_point.split(':')[0].split('.')[-1]
     _game_envs[env_type].add(env.id)
 
 # reading benchmark names directly from retro requires
@@ -84,6 +84,7 @@ def train(args, extra_args):
 
     print('Training {} on {}:{} with arguments \n{}'.format(args.alg, env_type, env_id, alg_kwargs))
 
+    """main training entry"""
     model = learn(
         env=env,
         seed=seed,
@@ -150,7 +151,7 @@ def get_env_type(args):
 
     # Re-parse the gym registry, since we could have new envs since last time.
     for env in gym.envs.registry.all():
-        env_type = env._entry_point.split(':')[0].split('.')[-1]
+        env_type = env.entry_point.split(':')[0].split('.')[-1]
         _game_envs[env_type].add(env.id)  # This is a set so add is idempotent
 
     if env_id in _game_envs.keys():
@@ -237,6 +238,7 @@ def main(args):
         rank = MPI.COMM_WORLD.Get_rank()
         configure_logger(args.log_path, format_strs=[])
 
+    """Main training entry"""
     model, env = train(args, extra_args)
 
     if args.save_path is not None and rank == 0:
