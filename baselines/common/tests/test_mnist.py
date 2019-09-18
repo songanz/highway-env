@@ -18,7 +18,7 @@ common_kwargs = {
 learn_args = {
     'a2c': dict(total_timesteps=50000),
     'acer': dict(total_timesteps=20000),
-    'dqn': dict(total_timesteps=5000),
+    'deepq': dict(total_timesteps=5000),
     'acktr': dict(total_timesteps=30000),
     'ppo2': dict(total_timesteps=50000, lr=1e-3, nsteps=128, ent_coef=0.0),
     'trpo_mpi': dict(total_timesteps=80000, timesteps_per_batch=100, cg_iters=10, lam=1.0, max_kl=0.001)

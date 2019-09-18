@@ -5,4 +5,4 @@ python3 ./scripts/train.py \
 --env=highway-discrete-intrinsic-rew-v0 \
 --save_path=/home/songanz/Documents/Git_repo/highway-env/models/dqn/Surprise_dis/00/latest \
 --env_json=/home/songanz/Documents/Git_repo/highway-env/scripts/config/IDM.json
---alg=dqn
+--alg=deepq
