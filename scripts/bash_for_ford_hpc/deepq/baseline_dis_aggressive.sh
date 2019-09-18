@@ -5,4 +5,4 @@ python3 ./scripts/train.py \
 --env=highway-discrete-v0 \
 --save_path=/s/szhan117/highway-env/models/dqn/baseline_dis_aggressive/00/latest \
 --env_json=/s/szhan117/highway-env/scripts/config/Aggressive.json \
---alg=dqn
+--alg=deepq

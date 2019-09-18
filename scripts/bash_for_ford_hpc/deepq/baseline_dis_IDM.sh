@@ -5,4 +5,4 @@ python3 ./scripts/train.py \
 --env=highway-discrete-v0 \
 --save_path=/s/szhan117/highway-env/models/dqn/baseline_dis/00/latest \
 --env_json=/s/szhan117/highway-env/scripts/config/IDM.json \
---alg=dqn
+--alg=deepq

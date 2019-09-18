@@ -15,7 +15,7 @@ sac_time_steps = []
 for i in range(1):
     ddpg_con_IDM_path = os.path.abspath(os.getcwd() + '/trails/ddpg/baseline_con/0' + str(i) + '/latest_log/progress.csv')
     sac_con_IDM_path = os.path.abspath(os.getcwd() + '/trails/sac/baseline_con/0' + str(i) + '/latest_log/progress.csv')
-    trpo_con_IDM_path = os.path.abspath(os.getcwd() + '/trails/dynamic_dv_5_trpo/baseline_con/0' + str(i) + '/latest_log/progress.csv')
+    trpo_con_IDM_path = os.path.abspath(os.getcwd() + '/trails/trpo/baseline_con/0' + str(i) + '/latest_log/progress.csv')
 
     ddpg_con_IDM.append(np.array(pd.read_csv(ddpg_con_IDM_path)['rollout/return_per_step_mean']))
     ddpg_time_steps.append(np.array(pd.read_csv(ddpg_con_IDM_path)['total/steps']))

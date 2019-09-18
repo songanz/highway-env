@@ -119,7 +119,7 @@ def scope_vars(scope, trainable_only=False):
 
 
 def scope_name():
-    """Returns the name of current scope as a string, e.g. dqn/q_func"""
+    """Returns the name of current scope as a string, e.g. deepq/q_func"""
     return tf.get_variable_scope().name
 
 
@@ -143,7 +143,7 @@ def default_param_noise_filter(var):
     return False
 
 
-def build_act(make_obs_ph, q_func, num_actions, scope="dqn", reuse=None):
+def build_act(make_obs_ph, q_func, num_actions, scope="deepq", reuse=None):
     """Creates the act function:
 
     Parameters
@@ -199,7 +199,7 @@ def build_act(make_obs_ph, q_func, num_actions, scope="dqn", reuse=None):
         return act
 
 
-def build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope="dqn", reuse=None, param_noise_filter_func=None):
+def build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope="deepq", reuse=None, param_noise_filter_func=None):
     """Creates the act function with support for parameter space noise exploration (https://arxiv.org/abs/1706.01905):
 
     Parameters
@@ -315,7 +315,7 @@ def build_act_with_param_noise(make_obs_ph, q_func, num_actions, scope="dqn", re
 
 
 def build_train(make_obs_ph, q_func, num_actions, optimizer, grad_norm_clipping=None, gamma=1.0,
-    double_q=True, scope="dqn", reuse=None, param_noise=False, param_noise_filter_func=None):
+    double_q=True, scope="deepq", reuse=None, param_noise=False, param_noise_filter_func=None):
     """Creates the train function:
 
     Parameters
