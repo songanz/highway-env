@@ -199,7 +199,7 @@ class DDPG(OffPolicyRLModel):
                  return_range=(-np.inf, np.inf), actor_lr=1e-4, critic_lr=1e-3, clip_norm=None, reward_scale=1.,
                  render=False, render_eval=False, memory_limit=None, buffer_size=50000, random_exploration=0.0,
                  verbose=0, tensorboard_log=None, _init_setup_model=True, policy_kwargs=None,
-                 full_tensorboard_log=False):
+                 full_tensorboard_log=False, surprise=False):
 
         super(DDPG, self).__init__(policy=policy, env=env, replay_buffer=None,
                                    verbose=verbose, policy_base=DDPGPolicy,
@@ -296,6 +296,7 @@ class DDPG(OffPolicyRLModel):
         self.summary = None
         self.episode_reward = None
         self.tb_seen_steps = None
+        self.surprise = surprise
 
         self.target_params = None
         self.obs_rms_params = None

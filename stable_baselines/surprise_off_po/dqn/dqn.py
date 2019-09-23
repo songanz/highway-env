@@ -3,14 +3,16 @@ from functools import partial
 import tensorflow as tf
 import numpy as np
 import gym
+import os
 
 from stable_baselines import logger, dqn
 from stable_baselines.common import tf_util, OffPolicyRLModel, SetVerbosity, TensorboardWriter
 from stable_baselines.common.vec_env import VecEnv
 from stable_baselines.common.schedules import LinearSchedule
+from stable_baselines.a2c.utils import total_episode_reward_logger
 from stable_baselines.surprise_off_po.dqn.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from stable_baselines.surprise_off_po.dqn.policies import DQNPolicy
-from stable_baselines.a2c.utils import total_episode_reward_logger
+from stable_baselines.surprise_off_po.net_CVAE import *
 
 
 class DQN(OffPolicyRLModel):
@@ -54,7 +56,7 @@ class DQN(OffPolicyRLModel):
                  learning_starts=1000, target_network_update_freq=500, prioritized_replay=False,
                  prioritized_replay_alpha=0.6, prioritized_replay_beta0=0.4, prioritized_replay_beta_iters=None,
                  prioritized_replay_eps=1e-6, param_noise=False, verbose=0, tensorboard_log=None,
-                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
+                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False, surprise=False):
 
         # TODO: replay_buffer refactoring
         super(DQN, self).__init__(policy=policy, env=env, replay_buffer=None, verbose=verbose, policy_base=DQNPolicy,
@@ -93,6 +95,19 @@ class DQN(OffPolicyRLModel):
         self.params = None
         self.summary = None
         self.episode_reward = None
+
+        self.surprise = surprise
+        if self.surprise:
+            state_size = self.env.observation_space.shape[0]
+            action_size = 1  # for discrete action, the CVAE action space is only one
+            vehicles_count = 7
+            latent_size = (vehicles_count - 1) * action_size
+            condi_size = state_size + action_size
+            self.env_model = CVAE(name='Environment_model_' + 'DQN_discrete',
+                                  state_size=state_size,
+                                  action_size=action_size,
+                                  latent_size=latent_size,
+                                  condi_size=condi_size)
 
         if _init_setup_model:
             self.setup_model()
@@ -176,6 +191,7 @@ class DQN(OffPolicyRLModel):
                                               final_p=self.exploration_final_eps)
 
             episode_rewards = [0.0]
+            episode_step_length = [0]
             episode_successes = []
             obs = self.env.reset()
             reset = True
@@ -220,6 +236,7 @@ class DQN(OffPolicyRLModel):
                                                                       self.num_timesteps)
 
                 episode_rewards[-1] += rew
+                episode_step_length[-1] += 1
                 if done:
                     maybe_is_success = info.get('is_success')
                     if maybe_is_success is not None:
@@ -227,6 +244,7 @@ class DQN(OffPolicyRLModel):
                     if not isinstance(self.env, VecEnv):
                         obs = self.env.reset()
                     episode_rewards.append(0.0)
+                    episode_step_length.append(0)
                     reset = True
 
                 # Do not train if the warmup phase is not over
@@ -242,7 +260,12 @@ class DQN(OffPolicyRLModel):
                     else:
                         obses_t, actions, rewards, obses_tp1, dones = self.replay_buffer.sample(self.batch_size)
                         weights, batch_idxes = np.ones_like(rewards), None
+                    if self.surprise:
+                        device = 'cpu'
+                        rew_i, _, _ = self.env_model.bonus_reward_each_state(actions[:, np.newaxis], obses_t, obses_tp1, rewards, device)
+                        rewards += rew_i
 
+                    """ Main training part """
                     if writer is not None:
                         # run loss backprop with summary, but once every 100 steps save the metadata
                         # (memory, compute time, ...)
@@ -252,6 +275,22 @@ class DQN(OffPolicyRLModel):
                             summary, td_errors = self._train_step(obses_t, actions, rewards, obses_tp1, obses_tp1,
                                                                   dones, weights, sess=self.sess, options=run_options,
                                                                   run_metadata=run_metadata)
+                            # update the CVAE model
+                            if self.surprise:
+                                for k in range(20):
+                                    s_C, a_C, r_C, nexts_C, d_C = self.replay_buffer.sample(
+                                        self.batch_size)
+                                    for w in range(5):
+                                        l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
+                                cwd = os.getcwd()  # get father folder of the scripts folder
+                                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+                                filename = self.env_model.name + '.pth.tar'
+                                pathname = os.path.join(CVAEdir, filename)
+                                tr.save({
+                                    'state_dict': self.env_model.state_dict(),
+                                    'optimizer': self.env_model.opt.state_dict(),
+                                }, pathname)
+
                             writer.add_run_metadata(run_metadata, 'step%d' % self.num_timesteps)
                         else:
                             summary, td_errors = self._train_step(obses_t, actions, rewards, obses_tp1, obses_tp1,
@@ -260,6 +299,20 @@ class DQN(OffPolicyRLModel):
                     else:
                         _, td_errors = self._train_step(obses_t, actions, rewards, obses_tp1, obses_tp1, dones, weights,
                                                         sess=self.sess)
+                        if self.surprise and (1 + self.num_timesteps) % 100 == 0:
+                            for k in range(20):
+                                s_C, a_C, r_C, nexts_C, d_C = self.replay_buffer.sample(
+                                    self.batch_size)
+                                for w in range(5):
+                                    l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
+                            cwd = os.getcwd()  # get father folder of the scripts folder
+                            CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+                            filename = self.env_model.name + '.pth.tar'
+                            pathname = os.path.join(CVAEdir, filename)
+                            tr.save({
+                                'state_dict': self.env_model.state_dict(),
+                                'optimizer': self.env_model.opt.state_dict(),
+                            }, pathname)
 
                     if self.prioritized_replay:
                         new_priorities = np.abs(td_errors) + self.prioritized_replay_eps
@@ -274,6 +327,8 @@ class DQN(OffPolicyRLModel):
                     mean_100ep_reward = -np.inf
                 else:
                     mean_100ep_reward = round(float(np.mean(episode_rewards[-101:-1])), 1)
+                    mean_100ep_reward_per_step = np.mean(np.array(episode_rewards[-101:-1]) /
+                                                         np.array(episode_step_length[-101:-1]))
 
                 num_episodes = len(episode_rewards)
                 if self.verbose >= 1 and done and log_interval is not None and len(episode_rewards) % log_interval == 0:
@@ -282,6 +337,7 @@ class DQN(OffPolicyRLModel):
                     if len(episode_successes) > 0:
                         logger.logkv("success rate", np.mean(episode_successes[-100:]))
                     logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
+                    logger.record_tabular("mean 100 episode reward per step", mean_100ep_reward_per_step)
                     logger.record_tabular("% time spent exploring",
                                           int(100 * self.exploration.value(self.num_timesteps)))
                     logger.dump_tabular()

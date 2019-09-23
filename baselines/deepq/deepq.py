@@ -250,7 +250,7 @@ def learn(env,
     update_target()
 
     episode_rewards = [0.0]
-    episode_step_lenth = [0]
+    episode_step_length = [0]
     saved_mean_reward = None
     obs = env.reset()
     reset = True
@@ -299,11 +299,11 @@ def learn(env,
             obs = new_obs
 
             episode_rewards[-1] += rew
-            episode_step_lenth[-1] += 1
+            episode_step_length[-1] += 1
             if done:
                 obs = env.reset()
                 episode_rewards.append(0.0)
-                episode_step_lenth.append(0)
+                episode_step_length.append(0)
                 reset = True
 
             if t > learning_starts and t % train_freq == 0:
@@ -325,7 +325,7 @@ def learn(env,
 
             mean_100ep_reward = round(np.mean(episode_rewards[-101:-1]), 1)
             mean_100ep_reward_per_step = np.mean(np.array(episode_rewards[-101:-1])/
-                                                 np.array(episode_step_lenth[-101:-1]))
+                                                 np.array(episode_step_length[-101:-1]))
             num_episodes = len(episode_rewards)
             # if done and print_freq is not None and len(episode_rewards) % print_freq == 0:
             if t % print_freq == 0 and t > 0:
