@@ -15,10 +15,11 @@ from stable_baselines import logger
 from stable_baselines.common import tf_util, OffPolicyRLModel, SetVerbosity, TensorboardWriter
 from stable_baselines.common.vec_env import VecEnv
 from stable_baselines.common.mpi_adam import MpiAdam
-from stable_baselines.surprise_off_po.ddpg.policies import DDPGPolicy
 from stable_baselines.common.mpi_running_mean_std import RunningMeanStd
 from stable_baselines.a2c.utils import total_episode_reward_logger
 from stable_baselines.surprise_off_po.dqn.replay_buffer import ReplayBuffer
+from stable_baselines.surprise_off_po.ddpg.policies import DDPGPolicy
+from stable_baselines.surprise_off_po.net_CVAE import *
 
 
 def normalize(tensor, stats):
@@ -198,7 +199,7 @@ class DDPG(OffPolicyRLModel):
                  normalize_returns=False, enable_popart=False, observation_range=(-5., 5.), critic_l2_reg=0.,
                  return_range=(-np.inf, np.inf), actor_lr=1e-4, critic_lr=1e-3, clip_norm=None, reward_scale=1.,
                  render=False, render_eval=False, memory_limit=None, buffer_size=50000, random_exploration=0.0,
-                 verbose=0, tensorboard_log=None, _init_setup_model=True, policy_kwargs=None,
+                 verbose=1, tensorboard_log=None, _init_setup_model=True, policy_kwargs=None,
                  full_tensorboard_log=False, surprise=False):
 
         super(DDPG, self).__init__(policy=policy, env=env, replay_buffer=None,
@@ -296,11 +297,23 @@ class DDPG(OffPolicyRLModel):
         self.summary = None
         self.episode_reward = None
         self.tb_seen_steps = None
-        self.surprise = surprise
 
         self.target_params = None
         self.obs_rms_params = None
         self.ret_rms_params = None
+
+        self.surprise = surprise
+        if self.surprise:
+            state_size = self.env.observation_space.shape[0]
+            action_size = self.action_space.shape[0]  # for continuous space
+            vehicles_count = 7
+            latent_size = (vehicles_count - 1) * action_size
+            condi_size = state_size + action_size
+            self.env_model = CVAE(name='Environment_model_' + 'DDPG_continuous',
+                                  state_size=state_size,
+                                  action_size=action_size,
+                                  latent_size=latent_size,
+                                  condi_size=condi_size)
 
         if _init_setup_model:
             self.setup_model()
@@ -648,6 +661,29 @@ class DDPG(OffPolicyRLModel):
         """
         # Get a batch
         obs, actions, rewards, next_obs, terminals = self.replay_buffer.sample(batch_size=self.batch_size)
+
+        if self.surprise:
+            device = 'cpu'
+            rew_i, _, _ = self.env_model.bonus_reward_each_state(actions, obs,
+                                                                 next_obs, rewards, device)
+            rewards += rew_i
+
+            if (1 + step) % 100 == 0:
+                for k in range(20):
+                    s_C, a_C, r_C, nexts_C, d_C = self.replay_buffer.sample(
+                        self.batch_size)
+                    for w in range(5):
+                        l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
+                print("[INFO] updating CVAE, loss: ",l_CVAE)
+                cwd = os.getcwd()  # get father folder of the scripts folder
+                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+                filename = self.env_model.name + '.pth.tar'
+                pathname = os.path.join(CVAEdir, filename)
+                tr.save({
+                    'state_dict': self.env_model.state_dict(),
+                    'optimizer': self.env_model.opt.state_dict(),
+                }, pathname)
+
         # Reshape to match previous behavior and placeholder shape
         rewards = rewards.reshape(-1, 1)
         terminals = terminals.reshape(-1, 1)

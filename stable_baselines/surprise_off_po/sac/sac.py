@@ -6,14 +6,16 @@ import warnings
 
 import numpy as np
 import tensorflow as tf
+import os
 
 from stable_baselines.a2c.utils import total_episode_reward_logger
 from stable_baselines.common import tf_util, OffPolicyRLModel, SetVerbosity, TensorboardWriter
 from stable_baselines.common.vec_env import VecEnv
-from stable_baselines.surprise_off_po.dqn.replay_buffer import ReplayBuffer
-from stable_baselines.surprise_off_po.sac.policies import SACPolicy
 from stable_baselines import logger
 from stable_baselines.ppo2.ppo2 import safe_mean, get_schedule_fn
+from stable_baselines.surprise_off_po.dqn.replay_buffer import ReplayBuffer
+from stable_baselines.surprise_off_po.sac.policies import SACPolicy
+from stable_baselines.surprise_off_po.net_CVAE import *
 
 
 def get_vars(scope):
@@ -94,7 +96,6 @@ class SAC(OffPolicyRLModel):
         self.gamma = gamma
         self.action_noise = action_noise
         self.random_exploration = random_exploration
-        self.surprise = surprise
 
         self.value_fn = None
         self.graph = None
@@ -127,6 +128,19 @@ class SAC(OffPolicyRLModel):
         self.processed_obs_ph = None
         self.processed_next_obs_ph = None
         self.log_ent_coef = None
+
+        self.surprise = surprise
+        if self.surprise:
+            state_size = self.env.observation_space.shape[0]
+            action_size = self.action_space.shape[0]  # for continuous space
+            vehicles_count = 7
+            latent_size = (vehicles_count - 1) * action_size
+            condi_size = state_size + action_size
+            self.env_model = CVAE(name='Environment_model_' + 'SAC_continuous',
+                                  state_size=state_size,
+                                  action_size=action_size,
+                                  latent_size=latent_size,
+                                  condi_size=condi_size)
 
         if _init_setup_model:
             self.setup_model()
@@ -329,6 +343,28 @@ class SAC(OffPolicyRLModel):
         batch = self.replay_buffer.sample(self.batch_size)
         batch_obs, batch_actions, batch_rewards, batch_next_obs, batch_dones = batch
 
+        if self.surprise:
+            device = 'cpu'
+            rew_i, _, _ = self.env_model.bonus_reward_each_state(batch_actions, batch_obs,
+                                                                 batch_next_obs, batch_rewards, device)
+            batch_rewards += rew_i
+
+            if (1 + step) % 100 == 0:
+                for k in range(20):
+                    s_C, a_C, r_C, nexts_C, d_C = self.replay_buffer.sample(
+                        self.batch_size)
+                    for w in range(5):
+                        l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
+                print("[INFO] updating CVAE, loss: ",l_CVAE)
+                cwd = os.getcwd()  # get father folder of the scripts folder
+                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
+                filename = self.env_model.name + '.pth.tar'
+                pathname = os.path.join(CVAEdir, filename)
+                tr.save({
+                    'state_dict': self.env_model.state_dict(),
+                    'optimizer': self.env_model.opt.state_dict(),
+                }, pathname)
+
         feed_dict = {
             self.observations_ph: batch_obs,
             self.actions_ph: batch_actions,
@@ -450,6 +486,7 @@ class SAC(OffPolicyRLModel):
                         frac = 1.0 - step / total_timesteps
                         current_lr = self.learning_rate(frac)
                         # Update policy and critics (q functions)
+                        """ Main training step """
                         mb_infos_vals.append(self._train_step(step, writer, current_lr))
                         # Update target network
                         if (step + grad_step) % self.target_update_interval == 0:
