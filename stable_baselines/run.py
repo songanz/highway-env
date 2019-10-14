@@ -83,6 +83,8 @@ def common_arg_parser():
     parser.add_argument('--save_video_length', help='Length of recorded video. Default: 200', default=200, type=int)
     parser.add_argument('--log_path', help='Directory to save learning curve data.', default=None, type=str)
     parser.add_argument('--CVAE_path', help='Directory import CVAE model.', default=None, type=str)
+    parser.add_argument('--surprise', type=bool, default=False, help='whether use surprise-based intrinsic reward for exploration')
+    parser.add_argument('--Adv_load_path', type=str, default=None, help='for adversarial environment')
     parser.add_argument('--play', default=False, action='store_true')
     return parser
 
@@ -155,9 +157,15 @@ def get_env_type(args):
 
 def get_alg_module(args, _env, alg_kwargs, submodule=None):
     submodule = submodule or args.alg
-    alg_module = import_module('.'.join(['stable_baselines', args.alg]))
-    policy = alg_kwargs.pop('network', None)
-    alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs)
+    if not args.surprise:
+        alg_module = import_module('.'.join(['stable_baselines', args.alg]))
+        policy = alg_kwargs.pop('network', None)
+        alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs)
+    else:
+        alg_module = import_module('.'.join(['stable_baselines.surprise_off_po', args.alg]))  # the alg from sur folder
+        policy = alg_kwargs.pop('network', None)
+        """ for surprise based intrinsic reward method, send in surprise=True """
+        alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs, surprise=True)
 
     return alg_class
 
@@ -250,6 +258,8 @@ def build_env(args):
             env_kwargs = json.loads(f.read())  # need to corresponding to env.__init__ arguments
         if args.CVAE_path:
             env_kwargs["config"]["CVAE_path"] = args.CVAE_path
+        if args.Adv_load_path:
+            env_kwargs["config"]["Adv_load_path"] = args.Adv_load_path
         env = make_vec_env(env_id, args.num_env or 1, seed, env_kwargs=env_kwargs)
     else:
         env = make_vec_env(env_id, args.num_env or 1, seed)

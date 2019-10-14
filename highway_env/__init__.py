@@ -15,10 +15,6 @@ register(
     entry_point='highway_env.envs:HighwayEnvCon_intrinsic_rew',
 )
 
-register(
-    id='highway-continuous-imagine-v0',
-    entry_point='highway_env.envs:HighwayEnvCon_imagine',
-)
 
 register(
     id='highway-discrete-v0',
@@ -31,8 +27,8 @@ register(
 )
 
 register(
-    id='highway-discrete-imagine-v0',
-    entry_point='highway_env.envs:HighwayEnvDis_imagine',
+    id='highway-discrete-adversarial-v0',
+    entry_point='highway_env.envs:HighwayEnvDisAdv',
 )
 
 register(

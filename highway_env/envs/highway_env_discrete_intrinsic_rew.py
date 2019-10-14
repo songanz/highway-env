@@ -1,6 +1,6 @@
 from __future__ import division, print_function, absolute_import
 import os
-from baselines.surprise_based.net_CVAE import *
+from stable_baselines.surprise_off_po.net_CVAE import *
 from highway_env.envs.highway_env_discrete import HighwayEnvDis
 
 
