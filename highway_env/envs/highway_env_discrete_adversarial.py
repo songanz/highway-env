@@ -27,19 +27,42 @@ class HighwayEnvDisAdv(HighwayEnvDis):
             self.target_vehicle_model = getattr(alg_module, config['target_model'].upper())(
                 policy, self, policy_kwargs=policy_kyw)
             self.target_vehicle_model.load(target_vehicle_model_path)
+            print("\t [INFO] target model loaded")
         except KeyError:
             print("Must give trained model path")
             exit()
 
-    def step(self, action):
-        return super(HighwayEnvDisAdv, self).step(action)
+    def _simulate(self, action=None):
+        """
+        Simulate with the target vehicle learned policy
+        :param action:
+        :return:
+        """
+        target_obs = self.observation.observe(vehicle=self.target_vehicle)
+        target_act = self.target_vehicle_model.predict(target_obs)
+        for k in range(int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY)):
+            if action is not None and self.time % int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY) == 0:
+                # Forward action to the vehicle
+                self.vehicle.act(self.ACTIONS[action])
+                self.target_vehicle.act(self.ACTIONS[target_act])
+
+            self.road.act()
+            self.road.step(1 / self.SIMULATION_FREQUENCY)
+            self.time += 1
+
+            # Automatically render intermediate simulation steps if a viewer has been launched
+            self._automatic_rendering()
+
+            # Stop at terminal states
+            if self.done or self._is_terminal():
+                break
+        self.enable_auto_render = False
 
     def _create_vehicles(self):
         """
             Create some new random vehicles of a given type, and add them on the road.
         """
         self.vehicle = ControlledVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
-        # Use MDPvehicle as the agent
         # self.vehicle = MDPVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
         self.road.vehicles.append(self.vehicle)
 
@@ -130,25 +153,3 @@ class HighwayEnvDisAdv(HighwayEnvDis):
         #       (dx, rew_x, dy, rew_y, vx, rew_v))
 
         return state_reward
-
-    def _is_terminal(self):
-        """
-            The episode is over if the ego vehicle crashed or the time is out.
-        """
-        return self.vehicle.crashed or self.steps/self.POLICY_FREQUENCY >= self.config["duration"]
-
-    def _cost(self, action):
-        """
-            The cost signal is the occurrence of collision
-        """
-        return float(self.vehicle.crashed)
-
-    def in_lane(self):
-        lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
-        lane_width = self.road.network.get_lane(lane_index).width
-        lane_num = len(self.road.network.lanes_list())
-
-        lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
-        lane_bound_2 = 0 - lane_width/2  # min y location in lane
-
-        return lane_bound_2 < self.vehicle.position[1] < lane_bound_1

@@ -108,19 +108,21 @@ class KinematicObservation(ObservationType):
         return df  # true state
 
 
-    def observe(self):
+    def observe(self, vehicle=None):
+        if not vehicle:
+            vehicle = self.env.vehicle
         # Add ego-vehicle
-        df = pandas.DataFrame.from_records([self.env.vehicle.to_dict()])[self.features]
+        df = pandas.DataFrame.from_records([vehicle.to_dict()])[self.features]
         df['x'][0] = 0  # see explanation in below triple-quoted strings
         # Add nearby traffic
-        close_vehicles = self.env.road.closest_vehicles_to(self.env.vehicle, self.vehicles_count - 1)
+        close_vehicles = self.env.road.closest_vehicles_to(vehicle, self.vehicles_count - 1)
         if close_vehicles:
             '''
             Given the vehicle to v.to_dict() will return relative x.
             Therefore, no need to carry the absolut position
             '''
             df = df.append(pandas.DataFrame.from_records(
-                [v.to_dict(self.env.vehicle)
+                [v.to_dict(vehicle)
                  for v in close_vehicles[-self.vehicles_count + 1:]])[self.features],
                            ignore_index=True)
         # Normalize
