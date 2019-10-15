@@ -1,0 +1,29 @@
+Logging to /home/songan/Documents/git_repo/highway-env/trails/ddqn/Surprise_dis_IDM/00/latest_log
+--------------------------------------
+| % time spent exploring  | 100      |
+| episodes                | 1        |
+| mean 100 episode rew... | -inf     |
+| mean 100 episode reward | -inf     |
+| steps                   | 0        |
+--------------------------------------
+--------------------------------------
+| % time spent exploring  | 99       |
+| episodes                | 3        |
+| mean 100 episode rew... | -14.9    |
+| mean 100 episode reward | -618     |
+| steps                   | 100      |
+--------------------------------------
+--------------------------------------
+| % time spent exploring  | 99       |
+| episodes                | 5        |
+| mean 100 episode rew... | -18.2    |
+| mean 100 episode reward | -616     |
+| steps                   | 200      |
+--------------------------------------
+--------------------------------------
+| % time spent exploring  | 99       |
+| episodes                | 6        |
+| mean 100 episode rew... | -15.6    |
+| mean 100 episode reward | -625     |
+| steps                   | 300      |
+--------------------------------------

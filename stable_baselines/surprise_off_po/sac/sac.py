@@ -65,6 +65,8 @@ class SAC(OffPolicyRLModel):
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param policy_kwargs: (dict) additional arguments to be passed to the policy on creation
     :param full_tensorboard_log: (bool) enable additional logging when using tensorboard
+    :param surprise: (bool) whether use the
+    :param CVAE_save_path: (str) save path for CVAE model
         Note: this has no effect on SAC logging for now
     """
 
@@ -73,7 +75,8 @@ class SAC(OffPolicyRLModel):
                  tau=0.005, ent_coef='auto', target_update_interval=1,
                  gradient_steps=1, target_entropy='auto', action_noise=None,
                  random_exploration=0.0, verbose=1, tensorboard_log=None,
-                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False, surprise=False):
+                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False,
+                 surprise=False, CVAE_save_path=None):
 
         super(SAC, self).__init__(policy=policy, env=env, replay_buffer=None, verbose=verbose,
                                   policy_base=SACPolicy, requires_vec_env=False, policy_kwargs=policy_kwargs)
@@ -130,6 +133,7 @@ class SAC(OffPolicyRLModel):
         self.log_ent_coef = None
 
         self.surprise = surprise
+        self.CVAE_save_path = CVAE_save_path
         if self.surprise:
             state_size = self.env.observation_space.shape[0]
             action_size = self.action_space.shape[0]  # for continuous space
@@ -356,10 +360,8 @@ class SAC(OffPolicyRLModel):
                     for w in range(5):
                         l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
                 print("[INFO] updating CVAE, loss: ",l_CVAE)
-                cwd = os.getcwd()  # get father folder of the scripts folder
-                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
                 filename = self.env_model.name + '.pth.tar'
-                pathname = os.path.join(CVAEdir, filename)
+                pathname = os.path.join(self.CVAE_save_path, filename)
                 tr.save({
                     'state_dict': self.env_model.state_dict(),
                     'optimizer': self.env_model.opt.state_dict(),

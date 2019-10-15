@@ -48,6 +48,8 @@ class DQN(OffPolicyRLModel):
     :param tensorboard_log: (str) the log location for tensorboard (if None, no logging)
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param full_tensorboard_log: (bool) enable additional logging when using tensorboard
+    :param surprise: (bool) whether use the
+    :param CVAE_save_path: (str) save path for CVAE model
         WARNING: this logging can take a lot of space quickly
     """
 
@@ -56,7 +58,8 @@ class DQN(OffPolicyRLModel):
                  learning_starts=1000, target_network_update_freq=500, prioritized_replay=False,
                  prioritized_replay_alpha=0.6, prioritized_replay_beta0=0.4, prioritized_replay_beta_iters=None,
                  prioritized_replay_eps=1e-6, param_noise=False, verbose=1, tensorboard_log=None,
-                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False, surprise=False):
+                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False,
+                 surprise=False, CVAE_save_path=None):
 
         # TODO: replay_buffer refactoring
         super(DQN, self).__init__(policy=policy, env=env, replay_buffer=None, verbose=verbose, policy_base=DQNPolicy,
@@ -97,6 +100,8 @@ class DQN(OffPolicyRLModel):
         self.episode_reward = None
 
         self.surprise = surprise
+        self.CVAE_save_path = CVAE_save_path
+
         if self.surprise:
             state_size = self.env.observation_space.shape[0]
             action_size = 1  # for discrete action, the CVAE action space is only one
@@ -282,10 +287,8 @@ class DQN(OffPolicyRLModel):
                                         self.batch_size)
                                     for w in range(5):
                                         l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
-                                cwd = os.getcwd()  # get father folder of the scripts folder
-                                CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
                                 filename = self.env_model.name + '.pth.tar'
-                                pathname = os.path.join(CVAEdir, filename)
+                                pathname = os.path.join(self.CVAE_save_path, filename)
                                 tr.save({
                                     'state_dict': self.env_model.state_dict(),
                                     'optimizer': self.env_model.opt.state_dict(),
@@ -305,10 +308,8 @@ class DQN(OffPolicyRLModel):
                                     self.batch_size)
                                 for w in range(5):
                                     l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_C, s_C, nexts_C, device)
-                            cwd = os.getcwd()  # get father folder of the scripts folder
-                            CVAEdir = os.path.abspath(cwd + '/models/CVAE/')
                             filename = self.env_model.name + '.pth.tar'
-                            pathname = os.path.join(CVAEdir, filename)
+                            pathname = os.path.join(self.CVAE_save_path, filename)
                             tr.save({
                                 'state_dict': self.env_model.state_dict(),
                                 'optimizer': self.env_model.opt.state_dict(),

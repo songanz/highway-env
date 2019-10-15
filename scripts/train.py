@@ -9,8 +9,8 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Adversarial.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
-# env = "highway-continuous-intrinsic-rew-v0"
-env = "highway-discrete-adversarial-v0"
+env = "highway-discrete-intrinsic-rew-v0"
+# env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
