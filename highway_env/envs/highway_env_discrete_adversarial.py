@@ -9,12 +9,27 @@ from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.control import MDPVehicle
 from highway_env.vehicle.control import ControlledVehicle
 
+# target model
+from stable_baselines.run import import_module, parse
+import os
+
 
 class HighwayEnvDisAdv(HighwayEnvDis):
 
     def __init__(self, config=None):
-        self.model = config['model']
         super(HighwayEnvDisAdv, self).__init__(config)
+        try:
+            target_vehicle_model_path = os.path.abspath(os.getcwd()
+                                                             + config['target_load_path'])
+            alg_module = import_module('.'.join(['stable_baselines', config['target_model']]))
+            policy = config['target_network']
+            policy_kyw = {k: parse(v) for k,v in config['target_network_kyw'].items()}
+            self.target_vehicle_model = getattr(alg_module, config['target_model'].upper())(
+                policy, self, policy_kwargs=policy_kyw)
+            self.target_vehicle_model.load(target_vehicle_model_path)
+        except KeyError:
+            print("Must give trained model path")
+            exit()
 
     def step(self, action):
         return super(HighwayEnvDisAdv, self).step(action)

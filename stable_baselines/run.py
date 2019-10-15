@@ -84,7 +84,6 @@ def common_arg_parser():
     parser.add_argument('--log_path', help='Directory to save learning curve data.', default=None, type=str)
     parser.add_argument('--CVAE_path', help='Directory import CVAE model.', default=None, type=str)
     parser.add_argument('--surprise', type=bool, default=False, help='whether use surprise-based intrinsic reward for exploration')
-    parser.add_argument('--Adv_load_path', type=str, default=None, help='for adversarial environment')
     parser.add_argument('--play', default=False, action='store_true')
     return parser
 
@@ -109,17 +108,18 @@ def parse_unknown_args(args):
 
     return retval
 
+def parse(v):
+
+    assert isinstance(v, str)
+    try:
+        return eval(v)
+    except (NameError, SyntaxError):
+        return v
+
 def parse_cmdline_kwargs(args):
     '''
     convert a list of '='-spaced command-line arguments to a dictionary, evaluating python objects when possible
     '''
-    def parse(v):
-
-        assert isinstance(v, str)
-        try:
-            return eval(v)
-        except (NameError, SyntaxError):
-            return v
 
     return {k: parse(v) for k,v in parse_unknown_args(args).items()}
 
@@ -256,10 +256,9 @@ def build_env(args):
     if args.env_json:
         with open(args.env_json) as f:
             env_kwargs = json.loads(f.read())  # need to corresponding to env.__init__ arguments
+        # for surprise based model
         if args.CVAE_path:
             env_kwargs["config"]["CVAE_path"] = args.CVAE_path
-        if args.Adv_load_path:
-            env_kwargs["config"]["Adv_load_path"] = args.Adv_load_path
         env = make_vec_env(env_id, args.num_env or 1, seed, env_kwargs=env_kwargs)
     else:
         env = make_vec_env(env_id, args.num_env or 1, seed)
