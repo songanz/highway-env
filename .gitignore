@@ -12,6 +12,7 @@ _build
 
 # Editor files
 .idea
+.vscode/
 
 # Test files
 .pytest_cache
