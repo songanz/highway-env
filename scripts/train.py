@@ -11,8 +11,8 @@ cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Adversarial.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
 load_path = os.path.abspath(cwd + '/trails/ddqn/baseline_dis/00/latest')
-# env = "highway-discrete-intrinsic-rew-v0"
-env = "highway-discrete-adversarial-v0"
+env = "highway-discrete-v0"
+# env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
@@ -31,8 +31,8 @@ DEFAULT_ARGUMENTS = [
     "--env_json=" + env_json_path,
 
     # for animation
-    "--animation=True",
-    "--load_path=" + load_path,
+    # "--animation=True",
+    # "--load_path=" + load_path,
 
     "--play"
 ]

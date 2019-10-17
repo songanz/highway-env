@@ -82,6 +82,7 @@ class HighwayEnvDis(AbstractEnv):
         config.update(self.DIFFICULTY_LEVELS[config["level"]])
         self.other_vehicles_type = config['other_vehicles_type'].split('.')[-1]
         self.spacing = str(config['initial_spacing'])
+        self.alg = config["alg"]
         super(HighwayEnvDis, self).__init__(config)
         self.reset()
         self.steps = 0
@@ -161,8 +162,13 @@ class HighwayEnvDis(AbstractEnv):
 
         # crash for episode
         if self.vehicle.crashed:
-            print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
-            return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+            # off-policy algorithm
+            if self.alg in ['dqn', 'sac', 'ddqg']:
+                print('crash rw: %8.2f' % self.config["collision_reward"])
+                return self.config["collision_reward"]
+            else:
+                print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
+                return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
 
         # outside road
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane

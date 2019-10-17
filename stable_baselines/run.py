@@ -261,6 +261,7 @@ def build_env(args):
         # for surprise based model
         if args.CVAE_path:
             env_kwargs["config"]["CVAE_path"] = args.CVAE_path
+        env_kwargs["config"]["alg"] = alg
         env = make_vec_env(env_id, args.num_env or 1, seed, env_kwargs=env_kwargs)
     else:
         env = make_vec_env(env_id, args.num_env or 1, seed)

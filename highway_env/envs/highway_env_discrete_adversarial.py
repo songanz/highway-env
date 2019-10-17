@@ -27,9 +27,11 @@ class HighwayEnvDisAdv(HighwayEnvDis):
             self.target_vehicle_model = getattr(alg_module, config['target_model'].upper())(
                 policy, self, policy_kwargs=policy_kyw)
             self.target_vehicle_model.load(target_vehicle_model_path)
+            self.tar_alg = config['target_model']
+            self.alg = config["alg"]
             print("\t [INFO] target model loaded")
         except KeyError:
-            print("Must give trained model path")
+            print("\t [ERROR] Must give trained model path")
             exit()
 
     def _simulate(self, action=None):
@@ -40,6 +42,7 @@ class HighwayEnvDisAdv(HighwayEnvDis):
         """
         target_obs = self.observation.observe(vehicle=self.target_vehicle)
         target_act, _ = self.target_vehicle_model.predict(target_obs)
+        print("\t [INFO] Target action: ", self.ACTIONS[target_act], "\t", "Action: ", self.ACTIONS[action])
         for k in range(int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY)):
             if action is not None and self.time % int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY) == 0:
                 # Forward action to the vehicle
@@ -49,6 +52,8 @@ class HighwayEnvDisAdv(HighwayEnvDis):
             self.road.act()
             self.road.step(1 / self.SIMULATION_FREQUENCY)
             self.time += 1
+            if abs(self.vehicle.lane_distance_to(self.target_vehicle)) > 50:
+                self.done = True
 
             # Automatically render intermediate simulation steps if a viewer has been launched
             self._automatic_rendering()
@@ -76,50 +81,42 @@ class HighwayEnvDisAdv(HighwayEnvDis):
             self.road.vehicles.append(vehicles_type.create_random(self.road, spacing=self.config["initial_spacing"]))
 
     def _reward(self, action):
-        # CheckBeforeUse: this reward should be the same with "highway_env_continuous" !!!
         """
+        Reward build for self.target_vehicle
         The reward is defined to foster driving at high speed, on the center of it's lanes, and to avoid collisions.
         :param action: the last action performed
         :return: the corresponding reward
         """
-        lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
-        lane_coords = self.road.network.get_lane(lane_index).local_coordinates(self.vehicle.position)
+        lane_index = self.road.network.get_closest_lane_index(self.target_vehicle.position)
+        lane_coords = self.road.network.get_lane(lane_index).local_coordinates(self.target_vehicle.position)
         lane_width = self.road.network.get_lane(lane_index).width
         lane_num = len(self.road.network.lanes_list())
 
         dy = lane_coords[1]  # distance to lane center
-        x = self.vehicle.position[0]
-        v = self.vehicle.velocity
-        vx = v * self.vehicle.direction[0]
-        vy = v * self.vehicle.direction[1]
+        x = self.target_vehicle.position[0]
+        v = self.target_vehicle.velocity
+        vx = v * self.target_vehicle.direction[0]
+        vy = v * self.target_vehicle.direction[1]
 
-        front_veh, rear_veh = self.road.neighbour_vehicles(self.vehicle, lane_index)  # get the front and rear vehicle in the same lane
-        try:
-            front_veh_vx = front_veh.velocity * front_veh.direction[0]
-            dx = front_veh.position[0] - x
-        except AttributeError:
-            front_veh_vx = self.SPEED_MAX
-            dx = self.M_ACL_DIST
+        # get the front and rear vehicle to the target vehicle in the same lane
+        front_veh, rear_veh = self.road.neighbour_vehicles(self.target_vehicle, lane_index)
 
-        sfDist = (self.NOM_DIST * self.LEN_SCL) + (vx - front_veh_vx) * self.NO_COLI_TIME  # calculate safe distance
-
-        # keep safe distance
-        # rew_x = 0
-        # if dx < sfDist * self.SAFE_FACTOR:
-            # print('dx: %8.4f;  sfDist: %8.4f' % (dx, sfDist))
-            # rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
         # in the center of lane
         rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
 
-        # state_reward = (rew_v + rew_y + rew_x) / 3
         state_reward = (rew_v + rew_y) / 2
 
         # crash for episode
-        if self.vehicle.crashed:
-            print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
-            return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+        if self.target_vehicle.crashed:
+            # off-policy algorithm
+            if self.alg in ['dqn', 'sac', 'ddqg']:
+                print('crash rw: %8.2f' % self.config["collision_reward"])
+                return self.config["collision_reward"]
+            else:
+                print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
+                return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
 
         # outside road
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
