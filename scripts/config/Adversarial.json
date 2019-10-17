@@ -12,6 +12,7 @@
       "other_vehicles_type": "highway_env.vehicle.behavior.IDMVehicle",
       "centering_position": [0.3, 0.5],
       "collision_reward": -2,
+
       "target_load_path": "/trails/ddqn/baseline_dis/00/latest",
       "target_model": "dqn",
       "target_network": "MlpPolicy",

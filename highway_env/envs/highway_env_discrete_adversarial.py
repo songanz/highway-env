@@ -39,7 +39,7 @@ class HighwayEnvDisAdv(HighwayEnvDis):
         :return:
         """
         target_obs = self.observation.observe(vehicle=self.target_vehicle)
-        target_act = self.target_vehicle_model.predict(target_obs)
+        target_act, _ = self.target_vehicle_model.predict(target_obs)
         for k in range(int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY)):
             if action is not None and self.time % int(self.SIMULATION_FREQUENCY // self.POLICY_FREQUENCY) == 0:
                 # Forward action to the vehicle

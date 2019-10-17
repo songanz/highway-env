@@ -1,5 +1,6 @@
 import os
 import stable_baselines.run as run
+import stable_baselines.animation as animation
 import highway_env  # don't remove, for registration the new game
 import sys
 
@@ -9,8 +10,9 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/Adversarial.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
-env = "highway-discrete-intrinsic-rew-v0"
-# env = "highway-discrete-adversarial-v0"
+load_path = os.path.abspath(cwd + '/trails/ddqn/baseline_dis/00/latest')
+# env = "highway-discrete-intrinsic-rew-v0"
+env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
@@ -27,6 +29,10 @@ DEFAULT_ARGUMENTS = [
 
     "--save_path=" + save_path,
     "--env_json=" + env_json_path,
+
+    # for animation
+    "--animation=True",
+    "--load_path=" + load_path,
 
     "--play"
 ]
@@ -81,4 +87,7 @@ if __name__ == "__main__":
         args[ind] = args[ind].replace('intrinsic-rew-', '')
         args.append("--surprise=True")
 
-    run.main(args)  # for training
+    if [s for s in args if "--animation=True" in s]:
+        animation.animation(args)
+    else:
+        run.main(args)  # for training
