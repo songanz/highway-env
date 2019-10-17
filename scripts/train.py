@@ -31,8 +31,8 @@ DEFAULT_ARGUMENTS = [
     "--env_json=" + env_json_path,
 
     # for animation
-    "--animation=True",
-    "--load_path=" + load_path,
+    # "--animation=True",
+    # "--load_path=" + load_path,
 
     "--play"
 ]
