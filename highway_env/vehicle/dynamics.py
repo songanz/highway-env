@@ -25,7 +25,7 @@ class Vehicle(Loggable):
     MAX_VELOCITY = 40
     """ Maximum reachable velocity [m/s] """
 
-    def __init__(self, road, position, heading=0, velocity=0):
+    def __init__(self, road, position, heading=0, velocity=0, color=None):
         self.road = road
         self.position = np.array(position).astype('float')
         self.heading = heading
@@ -34,6 +34,7 @@ class Vehicle(Loggable):
         self.lane = self.road.network.get_lane(self.lane_index) if self.road else None
         self.action = {'steering': 0, 'acceleration': 0}
         self.crashed = False
+        self.color = None
         self.log = []
 
     @classmethod

@@ -68,6 +68,7 @@ class HighwayEnvDisAdv(HighwayEnvDis):
 
         # add target vehicle
         self.target_vehicle = ControlledVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
+        self.target_vehicle.color = (200, 0, 150)  # black
         self.road.vehicles.append(self.target_vehicle)
 
         vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])  # IDM from the config: can change

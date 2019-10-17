@@ -55,6 +55,8 @@ class VehicleGraphics(object):
         if vehicle.crashed:
             color = cls.RED
 
+        elif vehicle.color:
+            color = vehicle.color
         elif isinstance(vehicle, LinearVehicle):
             color = cls.YELLOW
         elif isinstance(vehicle, IDMVehicle):
@@ -62,7 +64,7 @@ class VehicleGraphics(object):
         elif isinstance(vehicle, MDPVehicle):
             color = cls.EGO_COLOR
         elif isinstance(vehicle, Obstacle):
-            color = cls.GREEN
+            color = cls.RED
         if transparent:
             color = (color[0], color[1], color[2], 50)
         return color
