@@ -99,7 +99,8 @@ class HighwayEnvDisAdv(HighwayEnvDis):
         vy = v * self.target_vehicle.direction[1]
 
         # get the front and rear vehicle to the target vehicle in the same lane
-        front_veh, rear_veh = self.road.neighbour_vehicles(self.target_vehicle, lane_index)
+        near_v_count = self.config["observation"]["vehicle_count"]
+        close_vehicles = self.road.closest_vehicles_to(self.target_vehicle, near_v_count - 1)
 
         # run as quick as possible but not speeding
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
