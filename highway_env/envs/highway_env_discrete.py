@@ -153,6 +153,7 @@ class HighwayEnvDis(AbstractEnv):
             # print('dx: %8.4f;  sfDist: %8.4f' % (dx, sfDist))
             # rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
+        # Policy frequency must be 10
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
         # in the center of lane
         rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
@@ -198,7 +199,7 @@ class HighwayEnvDis(AbstractEnv):
             print("speed: %8.2f;  rew_env: %8.2f" % (vx, velocity_heading_punish))
             return velocity_heading_punish
 
-        # for debug
+        # for_debug
         # print('dx: %8.4f;  rew_x: %8.4f;  dy: %8.4f; rew_y: %8.4f;  vx: %8.4f;  rew_v: %8.4f' %
         #       (dx, rew_x, dy, rew_y, vx, rew_v))
 

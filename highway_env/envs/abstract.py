@@ -39,11 +39,11 @@ class AbstractEnv(gym.Env):
         A mapping of action labels to action indexes
     """
 
-    SIMULATION_FREQUENCY = 15
+    SIMULATION_FREQUENCY = 10
     """
         The frequency at which the system dynamics are simulated [Hz]
     """
-    POLICY_FREQUENCY = 1
+    POLICY_FREQUENCY = 10
     """
         The frequency at which the agent can take actions [Hz]
     """

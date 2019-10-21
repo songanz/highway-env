@@ -89,6 +89,9 @@ class ControlledVehicle(Vehicle):
             if self.road.network.get_lane(target_lane_index).is_reachable_from(self.position):
                 self.target_lane_index = target_lane_index
 
+        if self.target_velocity < 0:
+            self.target_velocity = 0
+
         action = {'steering': self.steering_control(self.target_lane_index),
                   'acceleration': self.velocity_control(self.target_velocity)}
         super(ControlledVehicle, self).act(action)
