@@ -53,7 +53,7 @@ class DQN(OffPolicyRLModel):
                  exploration_final_eps=0.02, train_freq=1, batch_size=32, checkpoint_freq=10000, checkpoint_path=None,
                  learning_starts=1000, target_network_update_freq=500, prioritized_replay=False,
                  prioritized_replay_alpha=0.6, prioritized_replay_beta0=0.4, prioritized_replay_beta_iters=None,
-                 prioritized_replay_eps=1e-6, param_noise=False, verbose=0, tensorboard_log=None,
+                 prioritized_replay_eps=1e-6, param_noise=False, verbose=1, tensorboard_log=None,
                  _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
 
         # TODO: replay_buffer refactoring
@@ -176,6 +176,7 @@ class DQN(OffPolicyRLModel):
                                               final_p=self.exploration_final_eps)
 
             episode_rewards = [0.0]
+            episode_step_length = [0]
             episode_successes = []
             obs = self.env.reset()
             reset = True
@@ -220,6 +221,7 @@ class DQN(OffPolicyRLModel):
                                                                       self.num_timesteps)
 
                 episode_rewards[-1] += rew
+                episode_step_length[-1] += 1
                 if done:
                     maybe_is_success = info.get('is_success')
                     if maybe_is_success is not None:
@@ -227,6 +229,7 @@ class DQN(OffPolicyRLModel):
                     if not isinstance(self.env, VecEnv):
                         obs = self.env.reset()
                     episode_rewards.append(0.0)
+                    episode_step_length.append(0)
                     reset = True
 
                 # Do not train if the warmup phase is not over
@@ -243,6 +246,7 @@ class DQN(OffPolicyRLModel):
                         obses_t, actions, rewards, obses_tp1, dones = self.replay_buffer.sample(self.batch_size)
                         weights, batch_idxes = np.ones_like(rewards), None
 
+                    """ Main training part """
                     if writer is not None:
                         # run loss backprop with summary, but once every 100 steps save the metadata
                         # (memory, compute time, ...)
@@ -272,16 +276,20 @@ class DQN(OffPolicyRLModel):
 
                 if len(episode_rewards[-101:-1]) == 0:
                     mean_100ep_reward = -np.inf
+                    mean_100ep_reward_per_step = -np.inf
                 else:
                     mean_100ep_reward = round(float(np.mean(episode_rewards[-101:-1])), 1)
+                    mean_100ep_reward_per_step = np.mean(np.array(episode_rewards[-101:-1]) /
+                                                         np.array(episode_step_length[-101:-1]))
 
                 num_episodes = len(episode_rewards)
-                if self.verbose >= 1 and done and log_interval is not None and len(episode_rewards) % log_interval == 0:
+                if self.verbose >= 1 and log_interval is not None and self.num_timesteps % log_interval == 0:
                     logger.record_tabular("steps", self.num_timesteps)
                     logger.record_tabular("episodes", num_episodes)
                     if len(episode_successes) > 0:
                         logger.logkv("success rate", np.mean(episode_successes[-100:]))
                     logger.record_tabular("mean 100 episode reward", mean_100ep_reward)
+                    logger.record_tabular("mean 100 episode reward per step", mean_100ep_reward_per_step)
                     logger.record_tabular("% time spent exploring",
                                           int(100 * self.exploration.value(self.num_timesteps)))
                     logger.dump_tabular()

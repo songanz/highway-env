@@ -35,7 +35,7 @@ class HighwayEnvCon(AbstractEnv):
     NO_COLI_TIME = 2  # at least for 2 seconds there wont be any collision
     LEN_SCL = 1.5  # at least this times length of car is minimum gap between cars
     VEL_SCL = 1.5  # this can be used for evaluate rear safety
-    NOM_DIST = 10  # for keep safe distance parameter
+    NOM_DIST = 5  # for keep safe distance parameter
     SAFE_FACTOR = 1.5  # for keep safe distance parameter
     M_ACL_DIST = 100
 
@@ -173,17 +173,18 @@ class HighwayEnvCon(AbstractEnv):
         sfDist = (self.NOM_DIST * self.LEN_SCL) + (vx - front_veh_vx) * self.NO_COLI_TIME  # calculate safe distance
 
         # keep safe distance
-        # rew_x = 0
-        # if dx < sfDist * self.SAFE_FACTOR:
-            # print('dx: %8.4f;  sfDist: %8.4f' % (dx, sfDist))
-            # rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(2*self.NOM_DIST**2))-1
+        rew_x = 0
+        if dx < sfDist * self.SAFE_FACTOR:
+            print('dx: %8.2f;  sfDist: %8.2f' % (dx, sfDist))
+            rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
+        # Policy frequency must be 10
         rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
         # in the center of lane
         rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
 
-        # state_reward = (rew_v + rew_y + rew_x) / 3
-        state_reward = (rew_v + rew_y) / 2
+        state_reward = (rew_v + rew_y + rew_x) / 3
+        # state_reward = (rew_v + rew_y) / 2
 
         # crash for episode
         if self.vehicle.crashed:
@@ -192,8 +193,7 @@ class HighwayEnvCon(AbstractEnv):
                 print('crash rw: %8.2f' % self.config["collision_reward"])
                 return self.config["collision_reward"]
             else:
-                print('crash rw: %8.2f' % (
-                            self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY))
+                print('crash rw: %8.2f' % (self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY))
                 return self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY
 
         # outside road

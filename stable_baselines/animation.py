@@ -48,14 +48,22 @@ def animation(args):
     alg_kwargs['network'] = args.network
 
     model = get_alg_module(args, env, alg_kwargs)
-    ob_space = env.observation_space
 
-    model.load(load_path)
+    model.load(load_path, env=env)  # give env, otherwise no lode
 
     obs = env.reset()
     while True:
         act, _ = model.predict(obs)
         obs, rew, done, _ = env.step(act)
+        print("Action: ", env.envs[0].env.ACTIONS[act[0]], "\t",
+              "Closest car xy: ",
+              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).x[1]), " ",
+              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[1]), "\t",
+              "Velocity: ",
+              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).vx[0]), "\t",
+              "Lane: ",
+              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[0]), "\t",
+              "reward: ", rew[0])
         env.render()
         if done:
             obs = env.reset()

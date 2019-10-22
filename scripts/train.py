@@ -10,14 +10,15 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')
-load_path = os.path.abspath(cwd + '/trails/sac/Surprise_dis/00/latest')
-env = "highway-discrete-intrinsic-rew-v0"
+# load_path = os.path.abspath(cwd + '/trails/ddqn/Surprise_dis/00/latest')
+# env = "highway-discrete-intrinsic-rew-v0"
+env = "highway-discrete-v0"
 # env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
     "--alg=dqn",
-    "--num_timesteps=1e6",  # episode * steps = num_timesteps = 1e6
+    "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
     "--network=MlpPolicy",

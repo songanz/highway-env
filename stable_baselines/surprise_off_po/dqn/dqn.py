@@ -333,7 +333,6 @@ class DQN(OffPolicyRLModel):
                                                          np.array(episode_step_length[-101:-1]))
 
                 num_episodes = len(episode_rewards)
-                # if self.verbose >= 1 and done and log_interval is not None and len(episode_rewards) % log_interval == 0:
                 if self.verbose >= 1 and log_interval is not None and self.num_timesteps % log_interval == 0:
                     logger.record_tabular("steps", self.num_timesteps)
                     logger.record_tabular("episodes", num_episodes)
