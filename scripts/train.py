@@ -12,13 +12,13 @@ env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
 save_path = os.path.abspath(cwd + '/trails/00/latest')  # for debug
 load_path = os.path.abspath(cwd + '/trails/trpo/baseline_con_agg/00/latest')  # for animation
 # for debug
-env = "highway-discrete-v0"
-# env = "highway-continuous-v0"
+# env = "highway-discrete-v0"
+env = "highway-continuous-v0"
 # env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
-    "--surprise=True",
+    # "--surprise=True",
 
     "--alg=trpo_mpi",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6

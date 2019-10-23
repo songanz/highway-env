@@ -1,0 +1,117 @@
+Logging to /home/songanz/Documents/Git_repo/highway-env/trails/trpo/Surprise_con_agg/00/latest_log
+********** Iteration 0 ************
+Optimizing Policy...
+Expected: 0.034 Actual: 0.031
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 72.4        |
+| EpRew/step              | -8.1        |
+| EpRewMean               | -459        |
+| EpThisIter              | 14          |
+| EpisodesSoFar           | 14          |
+| TimeElapsed             | 159         |
+| TimestepsSoFar          | 1024        |
+| entloss                 | 0.0         |
+| entropy                 | 2.846425    |
+| explained_variance_t... | 0.000178    |
+| meankl                  | 0.008244147 |
+| optimgain               | 0.030580452 |
+| surrgain                | 0.030580452 |
+-----------------------------------------
+********** Iteration 1 ************
+Optimizing Policy...
+Expected: 0.041 Actual: 0.028
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 74          |
+| EpRew/step              | -7.04       |
+| EpRewMean               | -387        |
+| EpThisIter              | 13          |
+| EpisodesSoFar           | 27          |
+| TimeElapsed             | 315         |
+| TimestepsSoFar          | 2048        |
+| entloss                 | 0.0         |
+| entropy                 | 2.8357182   |
+| explained_variance_t... | 0.000131    |
+| meankl                  | 0.009561244 |
+| optimgain               | 0.028406382 |
+| surrgain                | 0.028406382 |
+-----------------------------------------
+********** Iteration 2 ************
+Optimizing Policy...
+Expected: 0.037 Actual: 0.031
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 63.2        |
+| EpRew/step              | -5.59       |
+| EpRewMean               | -308        |
+| EpThisIter              | 18          |
+| EpisodesSoFar           | 45          |
+| TimeElapsed             | 505         |
+| TimestepsSoFar          | 3072        |
+| entloss                 | 0.0         |
+| entropy                 | 2.8368871   |
+| explained_variance_t... | -0.000731   |
+| meankl                  | 0.008876206 |
+| optimgain               | 0.030772327 |
+| surrgain                | 0.030772327 |
+-----------------------------------------
+********** Iteration 3 ************
+Optimizing Policy...
+Expected: 0.026 Actual: 0.030
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 63          |
+| EpRew/step              | -7.27       |
+| EpRewMean               | -354        |
+| EpThisIter              | 15          |
+| EpisodesSoFar           | 60          |
+| TimeElapsed             | 669         |
+| TimestepsSoFar          | 4096        |
+| entloss                 | 0.0         |
+| entropy                 | 2.8710117   |
+| explained_variance_t... | -7.86e-05   |
+| meankl                  | 0.013346305 |
+| optimgain               | 0.029776804 |
+| surrgain                | 0.029776804 |
+-----------------------------------------
+********** Iteration 4 ************
+Optimizing Policy...
+Expected: 0.047 Actual: 0.038
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 69.9        |
+| EpRew/step              | -6.64       |
+| EpRewMean               | -340        |
+| EpThisIter              | 12          |
+| EpisodesSoFar           | 72          |
+| TimeElapsed             | 844         |
+| TimestepsSoFar          | 5120        |
+| entloss                 | 0.0         |
+| entropy                 | 2.8779109   |
+| explained_variance_t... | 3.06e-05    |
+| meankl                  | 0.010253493 |
+| optimgain               | 0.037641704 |
+| surrgain                | 0.037641704 |
+-----------------------------------------
+********** Iteration 5 ************
+Optimizing Policy...
+Expected: 0.025 Actual: 0.021
+Stepsize OK!
+-----------------------------------------
+| EpLenMean               | 86          |
+| EpRew/step              | -6.12       |
+| EpRewMean               | -382        |
+| EpThisIter              | 7           |
+| EpisodesSoFar           | 79          |
+| TimeElapsed             | 1.02e+03    |
+| TimestepsSoFar          | 6144        |
+| entloss                 | 0.0         |
+| entropy                 | 2.8637083   |
+| explained_variance_t... | 6.61e-05    |
+| meankl                  | 0.00970615  |
+| optimgain               | 0.021297015 |
+| surrgain                | 0.021297015 |
+-----------------------------------------
+********** Iteration 6 ************
+Optimizing Policy...
