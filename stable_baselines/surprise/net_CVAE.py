@@ -24,7 +24,11 @@ class Memory:
             return random.sample(self.memory, len(self.memory))
 
     def remember(self, state, action, reward, next_state, coli):
-        self.memory.append((state, action, reward, next_state, coli))
+        try:
+            for i in range(len(reward)):  # for batch
+                self.memory.append((state[i], action[i], reward[i], next_state[i], coli[i]))
+        except TypeError:
+            self.memory.append((state, action, reward, next_state, coli))
 
 def getSAT(Buf, device, num_CVAE=0):
     ST_IDX = 0
@@ -44,7 +48,7 @@ def getSAT(Buf, device, num_CVAE=0):
     actionBuf_array = np.array([each[ACT_IDX] for each in miniBatch])
     rewards_array = np.array([each[REW_IDX] for each in miniBatch])
     nextStateBuf_array = np.array([each[NXTST_IDX] for each in miniBatch])
-    doneBuf_array = np.array([not each[DN_IDX] for each in miniBatch], dtype=int)
+    doneBuf_array = np.array(np.logical_not([each[DN_IDX] for each in miniBatch]), dtype=int)
 
     stateBuf = Variable(tr.from_numpy(stateBuf_array).to(device), requires_grad=False).float()
     actionBuf = Variable(tr.from_numpy(actionBuf_array.astype(int)).to(device), requires_grad=False).float()
