@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 from highway_env.envs.highway_env import HighwayEnv
 from highway_env.envs.highway_env_continuous import HighwayEnvCon
-from highway_env.envs.highway_env_continuous_intrinsic_rew import HighwayEnvCon_intrinsic_rew
+# from highway_env.envs.highway_env_continuous_intrinsic_rew import HighwayEnvCon_intrinsic_rew
 from highway_env.envs.highway_env_discrete import HighwayEnvDis
-from highway_env.envs.highway_env_discrete_intrinsic_rew import HighwayEnvDis_intrinsic_rew
+# from highway_env.envs.highway_env_discrete_intrinsic_rew import HighwayEnvDis_intrinsic_rew
 from highway_env.envs.highway_env_discrete_adversarial import HighwayEnvDisAdv
 
 from highway_env.envs.merge_env import MergeEnv

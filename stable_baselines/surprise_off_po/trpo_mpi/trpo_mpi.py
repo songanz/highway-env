@@ -6,6 +6,7 @@ import gym
 from mpi4py import MPI
 import tensorflow as tf
 import numpy as np
+import os
 
 import stable_baselines.common.tf_util as tf_util
 from stable_baselines.common import explained_variance, zipsame, dataset, fmt_row, colorize, ActorCriticRLModel, \
@@ -15,7 +16,8 @@ from stable_baselines.common.mpi_adam import MpiAdam
 from stable_baselines.common.cg import conjugate_gradient
 from stable_baselines.common.policies import ActorCriticPolicy
 from stable_baselines.a2c.utils import total_episode_reward_logger
-from stable_baselines.trpo_mpi.utils import traj_segment_generator, add_vtarg_and_adv, flatten_lists
+from stable_baselines.surprise_off_po.trpo_mpi.utils import traj_segment_generator, add_vtarg_and_adv, flatten_lists
+from stable_baselines.surprise_off_po.net_CVAE import *
 
 
 class TRPO_MPI(ActorCriticRLModel):
@@ -38,12 +40,15 @@ class TRPO_MPI(ActorCriticRLModel):
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param policy_kwargs: (dict) additional arguments to be passed to the policy on creation
     :param full_tensorboard_log: (bool) enable additional logging when using tensorboard
+    :param surprise: (bool) whether use the
+    :param CVAE_save_path: (str) save path for CVAE model
         WARNING: this logging can take a lot of space quickly
     """
 
     def __init__(self, policy, env, gamma=0.99, timesteps_per_batch=1024, max_kl=0.01, cg_iters=10, lam=0.98,
                  entcoeff=0.0, cg_damping=1e-2, vf_stepsize=3e-4, vf_iters=3, verbose=1, tensorboard_log=None,
-                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
+                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False,
+                 surprise=False, CVAE_save_path=None):
         super(TRPO_MPI, self).__init__(policy=policy, env=env, verbose=verbose, requires_vec_env=False,
                                        _init_setup_model=_init_setup_model, policy_kwargs=policy_kwargs)
 
@@ -92,6 +97,28 @@ class TRPO_MPI(ActorCriticRLModel):
         self.params = None
         self.summary = None
         self.episode_reward = None
+
+        self.surprise = surprise
+        self.CVAE_save_path = CVAE_save_path
+
+        if self.surprise:
+            self.Buf = Memory(MemLen=int(1e5))
+            state_size = self.env.observation_space.shape[0]
+            vehicles_count = 7
+            try:
+                action_size = self.action_space.shape[0]  # for continuous space
+                name = 'Environment_model_' + 'TRPO_continuous'
+            except IndexError:
+                action_size = 1
+                name = 'Environment_model_' + 'TRPO_discrete'
+
+            latent_size = (vehicles_count - 1) * action_size
+            condi_size = state_size + action_size
+            self.env_model = CVAE(name=name,
+                                  state_size=state_size,
+                                  action_size=action_size,
+                                  latent_size=latent_size,
+                                  condi_size=condi_size)
 
         if _init_setup_model:
             self.setup_model()
@@ -322,8 +349,38 @@ class TRPO_MPI(ActorCriticRLModel):
                     for k in range(self.g_step):
                         with self.timed("sampling"):
                             seg = seg_gen.__next__()
+
+
+                        if self.surprise:
+                            self.Buf.remember(seg['observations'][:-1], seg['actions'][:-1], seg["rewards"][:-1],
+                                              seg['observations'][1:], seg["dones"][1:])
+                            device = 'cpu'
+                            rew_i, _, _ = self.env_model.bonus_reward_each_state(seg['actions'][:-1],
+                                                                                 seg['observations'][:-1],
+                                                                                 seg['observations'][1:],
+                                                                                 seg["rewards"][:-1], device)
+                            rew_i = np.append(rew_i, 0)
+
+                            seg["rewards"] = np.add(seg["rewards"], rew_i)
+
+                            if (1 + episodes_so_far) % 10 == 0:
+                                for _ in range(20):
+                                    _, _, _, _, _, s_array, a_array, r_array, nextS_array, doneBuf_array \
+                                        = getSAT(self.Buf, device, num_CVAE=int(32))
+                                    for w in range(5):
+                                        l_CVAE, MSE_CVAE, KLD_CVAE = self.env_model.train_step(a_array, s_array,
+                                                                                               nextS_array, device)
+                                print("[INFO] updating CVAE, loss: ", l_CVAE)
+                                filename = self.env_model.name + '.pth.tar'
+                                pathname = os.path.join(self.CVAE_save_path, filename)
+                                tr.save({
+                                    'state_dict': self.env_model.state_dict(),
+                                    'optimizer': self.env_model.opt.state_dict(),
+                                }, pathname)
+
                         add_vtarg_and_adv(seg, self.gamma, self.lam)
                         # ob, ac, atarg, ret, td1ret = map(np.concatenate, (obs, acs, atargs, rets, td1rets))
+
                         observation, action = seg["observations"], seg["actions"]
                         atarg, tdlamret = seg["adv"], seg["tdlamret"]
 

@@ -1,3 +1,3 @@
-from stable_baselines.ddpg.ddpg import DDPG
-from stable_baselines.ddpg.policies import MlpPolicy, CnnPolicy, LnMlpPolicy, LnCnnPolicy
-from stable_baselines.ddpg.noise import AdaptiveParamNoiseSpec, NormalActionNoise, OrnsteinUhlenbeckActionNoise
+from stable_baselines.surprise_off_po.ddpg.ddpg import DDPG
+from stable_baselines.surprise_off_po.ddpg.policies import MlpPolicy, CnnPolicy, LnMlpPolicy, LnCnnPolicy
+from stable_baselines.surprise_off_po.ddpg.noise import AdaptiveParamNoiseSpec, NormalActionNoise, OrnsteinUhlenbeckActionNoise

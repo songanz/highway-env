@@ -55,15 +55,26 @@ def animation(args):
     while True:
         act, _ = model.predict(obs)
         obs, rew, done, _ = env.step(act)
-        print("Action: ", env.envs[0].env.ACTIONS[act[0]], "\t",
-              "Closest car xy: ",
-              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).x[1]), " ",
-              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[1]), "\t",
-              "Velocity: ",
-              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).vx[0]), "\t",
-              "Lane: ",
-              "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[0]), "\t",
-              "reward: ", rew[0])
+        try:
+            print("Action: ", env.envs[0].env.ACTIONS[act[0]], "\t",
+                  "Closest car xy: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).x[1]), " ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[1]), "\t",
+                  "Velocity: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).vx[0]), "\t",
+                  "Lane: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[0]), "\t",
+                  "reward: ", rew[0])
+        except TypeError:  # continuous
+            print("Action: ", act[0][0], ', ', act[0][1], "\t",
+                  "Closest car xy: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).x[1]), " ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[1]), "\t",
+                  "Velocity: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).vx[0]), "\t",
+                  "Lane: ",
+                  "{:.2f}".format(env.envs[0].env.observation.reverse_normalize(obs[0]).y[0]), "\t",
+                  "reward: ", rew[0])
         env.render()
         if done:
             obs = env.reset()

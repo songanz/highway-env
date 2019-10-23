@@ -183,13 +183,18 @@ class CVAE(nn.Module):  # in our case, condi_size should be state_size + action_
         self.decoder.eval()
 
         x = Variable(tr.from_numpy(next_state_).to(device), requires_grad=False).float()
-        c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
+        try:
+            c = Variable(tr.from_numpy(np.hstack((state_, ego_action_))).to(device), requires_grad=False).float()
+        except ValueError:  # for batch setup
+            c = Variable(tr.from_numpy(
+                np.hstack((state_, ego_action_[:,None]))).to(device), requires_grad=False).float()
         z_means,log_var = self.encoder(x,c)
 
         z_means_numpy = z_means.cpu().detach().numpy()
         standar_normal = {"mean": np.zeros(z_means_numpy.shape),
                           "log_std": np.zeros(z_means_numpy.shape)}
-        KL_D = log_likelihood(z_means_numpy, standar_normal) - log_likelihood(np.zeros(z_means_numpy.shape), standar_normal)
+        KL_D = log_likelihood(z_means_numpy, standar_normal) - \
+               log_likelihood(np.zeros(z_means_numpy.shape), standar_normal)
         # KL_D = -0.5 * tr.sum(1 + log_var - z_means.pow(2) - log_var.exp())
         # KL_D = KL_D.cpu().detach().numpy()
         eta = self.eta/max((1, np.mean(rewards)))

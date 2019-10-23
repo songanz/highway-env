@@ -157,17 +157,32 @@ def get_env_type(args):
 
 def get_alg_module(args, _env, alg_kwargs, submodule=None):
     submodule = submodule or args.alg
+    gamma = None
+
+    try:
+        gamma = alg_kwargs['gamma']
+        del alg_kwargs['gamma']
+    except KeyError:
+        pass
+
     if not args.surprise:
         alg_module = import_module('.'.join(['stable_baselines', args.alg]))
         policy = alg_kwargs.pop('network', None)
-        alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs)
+        if gamma:
+            alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs, gamma=gamma)
+        else:
+            alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs)
     else:
         alg_module = import_module('.'.join(['stable_baselines.surprise_off_po', args.alg]))  # the alg from sur folder
         policy = alg_kwargs.pop('network', None)
         CVAE_save_path = args.save_path[:-6]
         """ for surprise based intrinsic reward method, send in surprise=True """
-        alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs,
-                                                           surprise=True, CVAE_save_path=CVAE_save_path)
+        if gamma:
+            alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs,
+                                                           surprise=True, CVAE_save_path=CVAE_save_path, gamma=gamma)
+        else:
+            alg_class = getattr(alg_module, submodule.upper())(policy, _env, policy_kwargs=alg_kwargs,
+                                                               surprise=True, CVAE_save_path=CVAE_save_path)
 
     return alg_class
 

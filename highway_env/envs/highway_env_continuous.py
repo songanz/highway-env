@@ -3,6 +3,7 @@ import numpy as np
 from gym import spaces
 
 from highway_env import utils
+from highway_env.envs.observation import observation_factory
 from highway_env.envs.abstract import AbstractEnv
 from highway_env.road.road import Road, RoadNetwork
 from highway_env.vehicle.dynamics import Vehicle
@@ -94,6 +95,14 @@ class HighwayEnvCon(AbstractEnv):
         self.done = False
         return super(HighwayEnvCon, self).reset()
 
+    def define_spaces(self):
+        self.action_space = spaces.Box(-1., 1., shape=(2,), dtype=np.float32)
+
+        if "observation" not in self.config:
+            raise ValueError("The observation configuration must be defined")
+        self.observation = observation_factory(self, self.config["observation"])
+        self.observation_space = self.observation.space()
+
     def step(self, action):
 
         self.steps += 1
@@ -175,7 +184,7 @@ class HighwayEnvCon(AbstractEnv):
         # keep safe distance
         rew_x = 0
         if dx < sfDist * self.SAFE_FACTOR:
-            print('dx: %8.2f;  sfDist: %8.2f' % (dx, sfDist))
+            print('dx: %8.2f;  sfDist * SF: %8.2f' % (dx, sfDist * self.SAFE_FACTOR))
             rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(self.NOM_DIST**2))-1
         # run as quick as possible but not speeding
         # Policy frequency must be 10
@@ -188,13 +197,8 @@ class HighwayEnvCon(AbstractEnv):
 
         # crash for episode
         if self.vehicle.crashed:
-            # off-policy algorithm
-            if self.alg in ['dqn', 'sac', 'ddqg']:
-                print('crash rw: %8.2f' % self.config["collision_reward"])
-                return self.config["collision_reward"]
-            else:
-                print('crash rw: %8.2f' % (self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY))
-                return self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY
+            print('crash rw: %8.2f' % self.config["collision_reward"])
+            return self.config["collision_reward"]
 
         # outside road
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane

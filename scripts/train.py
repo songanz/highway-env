@@ -9,21 +9,25 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
 cwd = os.getcwd()
 env_json_path = os.path.abspath(cwd + '/scripts/config/IDM.json')
-save_path = os.path.abspath(cwd + '/trails/00/latest')
-# load_path = os.path.abspath(cwd + '/trails/ddqn/Surprise_dis/00/latest')
-# env = "highway-discrete-intrinsic-rew-v0"
+save_path = os.path.abspath(cwd + '/trails/00/latest')  # for debug
+load_path = os.path.abspath(cwd + '/trails/trpo/baseline_con_agg/00/latest')  # for animation
+# for debug
 env = "highway-discrete-v0"
+# env = "highway-continuous-v0"
 # env = "highway-discrete-adversarial-v0"
 
 DEFAULT_ARGUMENTS = [
     "--env=" + env,
-    "--alg=dqn",
+    "--surprise=True",
+
+    "--alg=trpo_mpi",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
     "--network=MlpPolicy",
     "--act_fun=tf.tanh",
     "--layers=[124,124,124]",
+    "--gamma=0.9",  # discounted factor
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
@@ -80,13 +84,6 @@ if __name__ == "__main__":
         args.append("--log_path=" + new_dir + filename + '_log')
     else:
         args.append("--log_path=" + directory + filename + '_log')
-
-    if 'intrinsic-rew' in [s for s in args if "--env=" in s][0] and\
-            "trpo" not in [s for s in args if "--alg=" in s][0]:  # only for off-policy method
-        item = [s for s in args if "--env=" in s][0]
-        ind = args.index(item)
-        args[ind] = args[ind].replace('intrinsic-rew-', '')
-        args.append("--surprise=True")
 
     if [s for s in args if "--animation=True" in s]:
         animation.animation(args)

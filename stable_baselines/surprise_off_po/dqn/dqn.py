@@ -5,13 +5,14 @@ import numpy as np
 import gym
 import os
 
-from stable_baselines import logger, dqn
+from stable_baselines import logger
 from stable_baselines.common import tf_util, OffPolicyRLModel, SetVerbosity, TensorboardWriter
 from stable_baselines.common.vec_env import VecEnv
 from stable_baselines.common.schedules import LinearSchedule
 from stable_baselines.a2c.utils import total_episode_reward_logger
 from stable_baselines.surprise_off_po.dqn.replay_buffer import ReplayBuffer, PrioritizedReplayBuffer
 from stable_baselines.surprise_off_po.dqn.policies import DQNPolicy
+from stable_baselines.surprise_off_po import dqn
 from stable_baselines.surprise_off_po.net_CVAE import *
 
 

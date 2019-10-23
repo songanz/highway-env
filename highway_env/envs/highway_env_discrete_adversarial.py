@@ -130,13 +130,8 @@ class HighwayEnvDisAdv(HighwayEnvDis):
 
         # crash for episode
         if self.target_vehicle.crashed:
-            # off-policy algorithm
-            if self.alg in ['dqn', 'sac', 'ddqg']:
-                print('crash rw: %8.2f' % self.config["collision_reward"])
-                return self.config["collision_reward"]
-            else:
-                print('crash rw: %8.2f' % (self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY))
-                return self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+            print('crash rw: %8.2f' % self.config["collision_reward"])
+            return self.config["collision_reward"]
 
         # outside road
         lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
