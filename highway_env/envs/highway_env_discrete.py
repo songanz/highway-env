@@ -32,7 +32,7 @@ class HighwayEnvDis(AbstractEnv):
     STEERING_RANGE = np.pi / 4 / POLICY_FREQUENCY  # original range is for POLICY_FREQUENCY = 1
     ACCELERATION_RANGE = 5.0 / POLICY_FREQUENCY  # original range is for POLICY_FREQUENCY = 1
 
-    SPEED_MAX = 30  # m/s
+    SPEED_MAX = 25  # m/s
     NO_COLI_TIME = 2  # at least for 2 seconds there wont be any collision
     LEN_SCL = 1.5  # at least this times length of car is minimum gap between cars
     VEL_SCL = 1.5  # this can be used for evaluate rear safety
@@ -111,8 +111,8 @@ class HighwayEnvDis(AbstractEnv):
             Create some new random vehicles of a given type, and add them on the road.
         """
         # Use MDPvehicle as the agent
-        self.vehicle = ControlledVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
-        # self.vehicle = MDPVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
+        # self.vehicle = ControlledVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
+        self.vehicle = MDPVehicle.create_random(self.road, spacing=self.config["initial_spacing"])
         self.road.vehicles.append(self.vehicle)
 
         vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])  # IDM from the config: can change
@@ -126,6 +126,12 @@ class HighwayEnvDis(AbstractEnv):
         :param action: the last action performed
         :return: the corresponding reward
         """
+        # crash for episode
+        if self.vehicle.crashed:
+            self.done = True
+            print('crash rw: %8.2f' % self.config["collision_reward"])
+            return self.config["collision_reward"]
+
         lane_index = self.road.network.get_closest_lane_index(self.vehicle.position)
         lane_coords = self.road.network.get_lane(lane_index).local_coordinates(self.vehicle.position)
         lane_width = self.road.network.get_lane(lane_index).width
@@ -150,49 +156,22 @@ class HighwayEnvDis(AbstractEnv):
         # keep safe distance
         rew_x = 0
         if dx < sfDist * self.SAFE_FACTOR:
-            print('dx: %8.2f;  sfDist * SF: %8.2f' % (dx, sfDist * self.SAFE_FACTOR))
-            rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(self.NOM_DIST**2))-1
+            # print('dx: %8.2f;  sfDist * SF: %8.2f' % (dx, sfDist * self.SAFE_FACTOR))
+            rew_x = np.exp(-(dx - sfDist*self.SAFE_FACTOR)**2/(self.NOM_DIST**2))
         # run as quick as possible but not speeding
         # Policy frequency must be 10
-        rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*(10*self.ACCELERATION_RANGE)**2))-1
+        rew_v = np.exp(-(vx - self.SPEED_MAX)**2/(2*2*self.ACCELERATION_RANGE**2))
         # in the center of lane
-        rew_y = np.exp(-dy**2/(0.1*lane_width**2))-1
+        rew_y = np.exp(-dy**2/(0.1*lane_width**2))
 
-        state_reward = (rew_v + rew_y + rew_x) / 3
+        lane_change_bonus = 0
+        # 0: left; 2: right
+        if (action == 0) or (action == 2):
+            lane_change_bonus = 1
+
+        state_reward = (rew_v + rew_y + rew_x + lane_change_bonus) / 3
         # state_reward = (rew_v + rew_y) / 2
 
-        # crash for episode
-        if self.vehicle.crashed:
-            print('crash rw: %8.2f' % self.config["collision_reward"])
-            return self.config["collision_reward"]
-
-        # outside road
-        lane_bound_1 = (lane_num - 1) * lane_width + lane_width/2  # max y location in lane
-        lane_bound_2 = 0 - lane_width/2  # min y location in lane
-
-        if self.vehicle.position[1] > lane_bound_1 + lane_width/2 or\
-                self.vehicle.position[1] < lane_bound_2 - lane_width/2:
-            self.done = True
-            print("vehicle_y: %8.2f;  rew_env: %8.2f"
-                  % (self.vehicle.position[1],
-                     self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY))
-            return self.config["collision_reward"] * self.config["duration"] * self.POLICY_FREQUENCY
-
-        if self.vehicle.position[1] > lane_bound_1:
-            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1]-lane_bound_1) - 5
-            print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
-            return out_lane_punish
-        elif self.vehicle.position[1] < lane_bound_2:
-            out_lane_punish = self.config["collision_reward"] * 2 * abs(self.vehicle.position[1] - lane_bound_2) - 5
-            print("vehicle_y: %8.2f;  rew_env: %8.2f" % (self.vehicle.position[1], out_lane_punish))
-            return out_lane_punish
-
-        # running in the oppsite direction
-        if vx < 0 or abs(vy/vx) > 1:
-            velocity_heading_punish = self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
-            self.done = True
-            print("speed: %8.2f;  rew_env: %8.2f" % (vx, velocity_heading_punish))
-            return velocity_heading_punish
 
         # for_debug
         # print('dx: %8.4f;  rew_x: %8.4f;  dy: %8.4f; rew_y: %8.4f;  vx: %8.4f;  rew_v: %8.4f' %
@@ -202,9 +181,10 @@ class HighwayEnvDis(AbstractEnv):
 
     def _is_terminal(self):
         """
-            The episode is over if the ego vehicle crashed or the time is out.
+            The episode is over if the ego vehicle crashed
         """
-        return self.vehicle.crashed or self.steps/self.POLICY_FREQUENCY >= self.config["duration"]
+        # return self.vehicle.crashed or self.steps/self.POLICY_FREQUENCY >= self.config["duration"]
+        return self.vehicle.crashed
 
     def _cost(self, action):
         """

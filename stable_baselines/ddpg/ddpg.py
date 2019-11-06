@@ -189,7 +189,9 @@ class DDPG(OffPolicyRLModel):
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param policy_kwargs: (dict) additional arguments to be passed to the policy on creation
     :param full_tensorboard_log: (bool) enable additional logging when using tensorboard
-        WARNING: this logging can take a lot of space quickly
+            WARNING: this logging can take a lot of space quickly
+    :param reset_env_step: (int) if the env is not reset in certain timestep, forcing reset
+
     """
 
     def __init__(self, policy, env, gamma=0.99, memory_policy=None, eval_env=None, nb_train_steps=50,
@@ -199,7 +201,7 @@ class DDPG(OffPolicyRLModel):
                  return_range=(-np.inf, np.inf), actor_lr=1e-4, critic_lr=1e-3, clip_norm=None, reward_scale=1.,
                  render=False, render_eval=False, memory_limit=None, buffer_size=50000, random_exploration=0.0,
                  verbose=1, tensorboard_log=None, _init_setup_model=True, policy_kwargs=None,
-                 full_tensorboard_log=False):
+                 full_tensorboard_log=False, reset_env_step=200):
 
         super(DDPG, self).__init__(policy=policy, env=env, replay_buffer=None,
                                    verbose=verbose, policy_base=DDPGPolicy,
@@ -244,6 +246,7 @@ class DDPG(OffPolicyRLModel):
         self.tensorboard_log = tensorboard_log
         self.full_tensorboard_log = full_tensorboard_log
         self.random_exploration = random_exploration
+        self.reset_env_step = reset_env_step
 
         # init
         self.graph = None
@@ -897,7 +900,7 @@ class DDPG(OffPolicyRLModel):
                                 if callback(locals(), globals()) is False:
                                     return self
 
-                            if done:
+                            if done or (self.reset_env_step and (1 + episode_step) == self.reset_env_step):
                                 # Episode done.
                                 epoch_episode_rewards.append(episode_reward)
                                 episode_rewards_history.append(episode_reward)
@@ -912,8 +915,7 @@ class DDPG(OffPolicyRLModel):
                                     episode_successes.append(float(maybe_is_success))
 
                                 self._reset()
-                                if not isinstance(self.env, VecEnv):
-                                    obs = self.env.reset()
+                                obs = self.env.reset()
 
                         # Train.
                         epoch_actor_losses = []

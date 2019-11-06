@@ -130,6 +130,7 @@ class HighwayEnvDisAdv(HighwayEnvDis):
 
         # crash for episode
         if self.target_vehicle.crashed:
+            self.done = True
             print('crash rw: %8.2f' % self.config["collision_reward"])
             return self.config["collision_reward"]
 
@@ -155,11 +156,11 @@ class HighwayEnvDisAdv(HighwayEnvDis):
             return out_lane_punish
 
         # running in the oppsite direction
-        if vx < 0 or abs(vy/vx) > 1:
-            velocity_heading_punish = self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
-            self.done = True
-            print("speed: %8.2f;  rew_env: %8.2f" % (vx, velocity_heading_punish))
-            return velocity_heading_punish
+        # if vx < 0 or abs(vy/vx) > 1:
+        #     velocity_heading_punish = self.config["collision_reward"]*self.config["duration"]*self.POLICY_FREQUENCY
+        #     self.done = True
+        #     print("speed: %8.2f;  rew_env: %8.2f" % (vx, velocity_heading_punish))
+        #     return velocity_heading_punish
 
         # for debug
         # print('dx: %8.4f;  rew_x: %8.4f;  dy: %8.4f; rew_y: %8.4f;  vx: %8.4f;  rew_v: %8.4f' %

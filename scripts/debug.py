@@ -7,7 +7,20 @@ import sys
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # for remove TF warning
 
+cwd = os.getcwd()
+env_json_path = os.path.abspath(cwd + '/scripts/config/Aggressive.json')
+save_path = os.path.abspath(cwd + '/trails/00/latest')  # for debug
+load_path = os.path.abspath(cwd + '/trails/ddqn/baseline_dis_agg/01/latest')  # for animation
+# for debug
+env = "highway-discrete-v0"
+# env = "highway-continuous-v0"
+# env = "highway-discrete-adversarial-v0"
+
 DEFAULT_ARGUMENTS = [
+    "--env=" + env,
+    # "--surprise=True",
+
+    "--alg=dqn",
     "--num_timesteps=5e5",  # episode * steps = num_timesteps = 1e6
 
     # policy net parameter
@@ -18,6 +31,13 @@ DEFAULT_ARGUMENTS = [
 
     "--num_env=0",  # >1 for mpi, disabled for online learning
     "--save_video_interval=0",
+
+    "--save_path=" + save_path,
+    "--env_json=" + env_json_path,
+
+    # for animation
+    "--animation=True",
+    "--load_path=" + load_path,
 
     "--play"
 ]

@@ -41,7 +41,7 @@ class TRPO_MPI(ActorCriticRLModel):
         WARNING: this logging can take a lot of space quickly
     """
 
-    def __init__(self, policy, env, gamma=0.99, timesteps_per_batch=1024, max_kl=0.01, cg_iters=10, lam=0.98,
+    def __init__(self, policy, env, gamma=0.99, timesteps_per_batch=256, max_kl=0.01, cg_iters=10, lam=0.98,
                  entcoeff=0.0, cg_damping=1e-2, vf_stepsize=3e-4, vf_iters=3, verbose=1, tensorboard_log=None,
                  _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
         super(TRPO_MPI, self).__init__(policy=policy, env=env, verbose=verbose, requires_vec_env=False,

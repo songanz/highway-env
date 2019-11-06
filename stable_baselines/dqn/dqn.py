@@ -47,6 +47,7 @@ class DQN(OffPolicyRLModel):
     :param _init_setup_model: (bool) Whether or not to build the network at the creation of the instance
     :param full_tensorboard_log: (bool) enable additional logging when using tensorboard
         WARNING: this logging can take a lot of space quickly
+    :param reset_env_step: (int) if the env is not reset in certain timestep, forcing reset
     """
 
     def __init__(self, policy, env, gamma=0.99, learning_rate=5e-4, buffer_size=50000, exploration_fraction=0.1,
@@ -54,7 +55,7 @@ class DQN(OffPolicyRLModel):
                  learning_starts=1000, target_network_update_freq=500, prioritized_replay=False,
                  prioritized_replay_alpha=0.6, prioritized_replay_beta0=0.4, prioritized_replay_beta_iters=None,
                  prioritized_replay_eps=1e-6, param_noise=False, verbose=1, tensorboard_log=None,
-                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False):
+                 _init_setup_model=True, policy_kwargs=None, full_tensorboard_log=False, reset_env_step = 200):
 
         # TODO: replay_buffer refactoring
         super(DQN, self).__init__(policy=policy, env=env, replay_buffer=None, verbose=verbose, policy_base=DQNPolicy,
@@ -79,6 +80,7 @@ class DQN(OffPolicyRLModel):
         self.gamma = gamma
         self.tensorboard_log = tensorboard_log
         self.full_tensorboard_log = full_tensorboard_log
+        self.reset_env_step = reset_env_step
 
         self.graph = None
         self.sess = None
@@ -222,12 +224,11 @@ class DQN(OffPolicyRLModel):
 
                 episode_rewards[-1] += rew
                 episode_step_length[-1] += 1
-                if done:
+                if done or (self.reset_env_step and (1 + episode_step_length[-1]) == self.reset_env_step):
                     maybe_is_success = info.get('is_success')
                     if maybe_is_success is not None:
                         episode_successes.append(float(maybe_is_success))
-                    if not isinstance(self.env, VecEnv):
-                        obs = self.env.reset()
+                    obs = self.env.reset()
                     episode_rewards.append(0.0)
                     episode_step_length.append(0)
                     reset = True

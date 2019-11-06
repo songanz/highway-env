@@ -124,8 +124,7 @@ def traj_segment_generator(policy, env, horizon, reward_giver=None, gail=False):
             cur_ep_ret = 0
             cur_ep_true_ret = 0
             current_ep_len = 0
-            if not isinstance(env, VecEnv):
-                observation = env.reset()
+            observation = env.reset()
         step += 1
 
 
