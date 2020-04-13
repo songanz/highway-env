@@ -1,0 +1,1 @@
+Logging to /home/songanz/Documents/Git_repo/highway-env/trails/02/latest_log
